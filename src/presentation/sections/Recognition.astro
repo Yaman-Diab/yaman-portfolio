@@ -1,0 +1,76 @@
+---
+import type { Recognition } from '@/domain/entities/career';
+import type { Locale } from '@/domain/entities/locale';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  recognitions: Recognition[];
+}
+
+const { locale, recognitions } = Astro.props;
+const t = useUi(locale);
+---
+
+<section class="section theme-paper-dim" id="recognition">
+  <div class="wrap">
+    <h2 class="section__title">{t.recognition.title}</h2>
+
+    <ul class="recognition__list" data-inview>
+      {
+        recognitions.map((item, index) => (
+          <li class="recognition__item" data-reveal style={`--i:${index}`}>
+            <p class="recognition__year">{item.year}</p>
+            <h3>{item.title}</h3>
+            <p class="recognition__body">{item.body}</p>
+            {item.link && (
+              <a class="link" href={item.link.url} rel="noopener">
+                {item.link.label}
+              </a>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .recognition__list {
+    display: grid;
+    gap: var(--space-7);
+    margin-block-start: var(--space-7);
+  }
+
+  .recognition__item {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    justify-items: start;
+    padding-block-start: var(--space-5);
+    border-block-start: 2px solid var(--fg);
+  }
+
+  .recognition__year {
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-warm);
+    font-weight: 600;
+    font-size: var(--text-sm);
+  }
+
+  .recognition__item h3 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+  }
+
+  .recognition__body {
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 52rem) {
+    .recognition__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: var(--space-7);
+    }
+  }
+</style>

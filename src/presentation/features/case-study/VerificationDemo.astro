@@ -1,0 +1,199 @@
+---
+import type { UiStrings } from '@/presentation/i18n/ui';
+
+interface Props {
+  strings: UiStrings['verificationDemo'];
+}
+
+const { strings } = Astro.props;
+const order = ['form', 'pending', 'rejected', 'approved'] as const;
+---
+
+<section class="vdemo" data-verification-demo data-strings={JSON.stringify(strings)} aria-label={strings.title}>
+  <header class="vdemo__head">
+    <h4>{strings.title}</h4>
+    <p>{strings.note}</p>
+  </header>
+
+  <ol class="vdemo__states" aria-label={strings.stateLabel}>
+    {
+      order.map((state) => (
+        <li data-state={state} class={state === 'form' ? 'is-current' : undefined}>
+          <span class="nuqta" aria-hidden="true" />
+          {strings.states[state].name}
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="vdemo__screen" role="status" aria-live="polite">
+    <p class="vdemo__name" data-name>{strings.states.form.name}</p>
+    <p data-body>{strings.states.form.body}</p>
+  </div>
+
+  <div class="vdemo__actions" data-actions>
+    <button type="button" class="button button--primary" data-to="pending">{strings.actions.submit}</button>
+  </div>
+</section>
+
+<script>
+  type State = 'form' | 'pending' | 'rejected' | 'approved';
+  type ActionKey = 'submit' | 'approve' | 'reject' | 'resubmit' | 'reset';
+
+  interface Strings {
+    states: Record<State, { name: string; body: string }>;
+    actions: Record<ActionKey, string>;
+  }
+
+  /** The only moves the screen allows from each state. */
+  const TRANSITIONS: Record<State, { action: ActionKey; to: State }[]> = {
+    form: [{ action: 'submit', to: 'pending' }],
+    pending: [
+      { action: 'approve', to: 'approved' },
+      { action: 'reject', to: 'rejected' },
+    ],
+    rejected: [{ action: 'resubmit', to: 'pending' }],
+    approved: [{ action: 'reset', to: 'form' }],
+  };
+
+  function mount(root: HTMLElement): void {
+    const strings = JSON.parse(root.dataset.strings ?? '{}') as Strings;
+    const name = root.querySelector<HTMLElement>('[data-name]')!;
+    const body = root.querySelector<HTMLElement>('[data-body]')!;
+    const actions = root.querySelector<HTMLElement>('[data-actions]')!;
+    const screen = root.querySelector<HTMLElement>('.vdemo__screen')!;
+    const markers = root.querySelectorAll<HTMLElement>('[data-state]');
+
+    const show = (state: State): void => {
+      name.textContent = strings.states[state].name;
+      body.textContent = strings.states[state].body;
+      screen.dataset.current = state;
+      markers.forEach((marker) => marker.classList.toggle('is-current', marker.dataset.state === state));
+
+      actions.replaceChildren(
+        ...TRANSITIONS[state].map(({ action, to }, index) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `button ${index === 0 ? 'button--primary' : 'button--ghost'}`;
+          button.textContent = strings.actions[action];
+          button.addEventListener('click', () => {
+            show(to);
+            actions.querySelector<HTMLButtonElement>('button')?.focus();
+          });
+          return button;
+        }),
+      );
+    };
+
+    show('form');
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-verification-demo]').forEach(mount);
+</script>
+
+<style>
+  .vdemo {
+    display: grid;
+    gap: var(--space-5);
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1.5px solid var(--fg);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .vdemo__head {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .vdemo h4 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 650;
+    line-height: var(--leading-snug);
+  }
+
+  .vdemo__head p {
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .vdemo__states {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+  }
+
+  .vdemo__states li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    transition: color var(--dur-fast) ease;
+  }
+
+  .vdemo__states .nuqta {
+    font-size: 0.8em;
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px currentColor;
+    transition:
+      background-color var(--dur-fast) ease,
+      box-shadow var(--dur-fast) ease;
+  }
+
+  .vdemo__states li.is-current {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .vdemo__states li.is-current .nuqta {
+    background: var(--apricot);
+    box-shadow: none;
+  }
+
+  .vdemo__screen {
+    display: grid;
+    gap: var(--space-2);
+    align-content: center;
+    min-height: 8.5rem;
+    padding: var(--space-5);
+    border-radius: var(--radius);
+    border-inline-start: 4px solid var(--fg-muted);
+    background: var(--bg);
+    transition: border-color var(--dur) ease;
+  }
+
+  .vdemo__screen[data-current='pending'] {
+    border-inline-start-color: var(--apricot);
+  }
+
+  .vdemo__screen[data-current='rejected'] {
+    border-inline-start-color: var(--danger);
+  }
+
+  .vdemo__screen[data-current='approved'] {
+    border-inline-start-color: var(--ok);
+  }
+
+  .vdemo__name {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 650;
+    line-height: var(--leading-snug);
+  }
+
+  .vdemo__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+  }
+
+  .vdemo__actions :global(.button) {
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    font-size: var(--text-sm);
+  }
+</style>

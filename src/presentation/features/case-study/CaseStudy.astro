@@ -1,0 +1,424 @@
+---
+import { routes } from '@/app/routes';
+import type { Locale } from '@/domain/entities/locale';
+import type { Project } from '@/domain/entities/project';
+import StatusPill from '@/presentation/components/StatusPill.astro';
+import { useUi } from '@/presentation/i18n/ui';
+import FlowDiagram from './FlowDiagram.astro';
+import SyncQueueDemo from './SyncQueueDemo.astro';
+import VerificationDemo from './VerificationDemo.astro';
+
+interface Props {
+  locale: Locale;
+  project: Project;
+  next: Project;
+}
+
+const { locale, project, next } = Astro.props;
+const t = useUi(locale);
+const altLang = locale === 'ar' ? 'en' : 'ar';
+---
+
+<article class="case">
+  <header class="case__hero theme-green">
+    <div class="wrap">
+      <a class="case__back" href={routes.section(locale, 'work')}>
+        <span class="case__back-arrow" aria-hidden="true"></span>
+        {t.caseStudy.back}
+      </a>
+
+      <h1 class="case__title">
+        <span style={`view-transition-name: project-${project.slug}`}>{project.name}</span>
+        <span class="case__alt-name" lang={altLang} dir={altLang === 'ar' ? 'rtl' : 'ltr'} aria-hidden="true"
+          >{project.altName}</span
+        >
+      </h1>
+      <p class="case__summary">{project.summary}</p>
+
+      <dl class="case__meta">
+        <div>
+          <dt>{t.caseStudy.role}</dt>
+          <dd>{project.role}</dd>
+        </div>
+        <div>
+          <dt>{t.caseStudy.status}</dt>
+          <dd><StatusPill status={project.status} label={project.statusLabel} /></dd>
+        </div>
+        <div>
+          <dt>{t.caseStudy.platforms}</dt>
+          <dd>{project.platforms}</dd>
+        </div>
+        <div>
+          <dt>{t.caseStudy.year}</dt>
+          <dd>{project.year}</dd>
+        </div>
+      </dl>
+
+      {
+        project.links.length > 0 && (
+          <div class="case__links">
+            {project.links.map((link) => (
+              <a class="button button--primary" href={link.url} rel="noopener">
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </header>
+
+  <div class="theme-paper">
+    <div class="wrap case__body">
+      <section class="case__block">
+        <h2>{t.caseStudy.problem}</h2>
+        <div class="case__prose case__prose--lead">
+          {project.problem.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+      </section>
+
+      <section class="case__block">
+        <h2>{t.caseStudy.myPart}</h2>
+        <ul class="case__list">
+          {
+            project.responsibilities.map((item) => (
+              <li>
+                <span class="nuqta" aria-hidden="true" />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <div class="theme-paper-dim">
+    <div class="wrap case__challenges">
+      <h2 class="case__challenges-title">{t.caseStudy.challenges}</h2>
+      {
+        project.challenges.map((challenge) => (
+          <section class="challenge">
+            <div class="challenge__text">
+              <h3>{challenge.title}</h3>
+              <p>{challenge.body}</p>
+            </div>
+            {challenge.flow && <FlowDiagram flow={challenge.flow} />}
+            {challenge.demo === 'sync-queue' && <SyncQueueDemo strings={t.syncDemo} />}
+            {challenge.demo === 'verification-states' && <VerificationDemo strings={t.verificationDemo} />}
+          </section>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="theme-paper">
+    <div class="wrap case__body">
+      <section class="case__block">
+        <h2>{t.caseStudy.architecture}</h2>
+        <div class="case__prose">
+          <p>{project.architecture}</p>
+          <ul class="case__stack" dir="ltr" lang="en">
+            {project.stack.map((tool) => <li>{tool}</li>)}
+          </ul>
+        </div>
+      </section>
+
+      <section class="case__block">
+        <h2>{t.caseStudy.outcome}</h2>
+        <ul class="case__list case__list--outcome">
+          {
+            project.outcome.map((item) => (
+              <li>
+                <span class="nuqta" aria-hidden="true" />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <a class="case__next theme-paper-dim" href={routes.project(locale, next.slug)}>
+    <span class="wrap case__next-inner">
+      <span class="case__next-label">{t.caseStudy.next}</span>
+      <span class="case__next-name">{next.name}</span>
+      <span class="case__next-tagline">{next.tagline}</span>
+    </span>
+  </a>
+</article>
+
+<style>
+  /* ---------- Hero ---------- */
+
+  .case__hero {
+    padding-block: clamp(1.5rem, 1rem + 2vw, 3rem) clamp(3rem, 2rem + 5vw, 6rem);
+  }
+
+  .case__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: color var(--dur-fast) ease;
+  }
+
+  .case__back:hover {
+    color: var(--fg);
+  }
+
+  /* A chevron drawn with borders, pointing back the way reading came from. */
+  .case__back-arrow {
+    width: 0.5em;
+    height: 0.5em;
+    border-block-end: 1.5px solid currentColor;
+    border-inline-start: 1.5px solid currentColor;
+    transform: rotate(calc(var(--dir) * 45deg));
+    transition: translate var(--dur-fast) var(--ease-out);
+  }
+
+  .case__back:hover .case__back-arrow {
+    translate: calc(var(--dir) * -0.25rem) 0;
+  }
+
+  .case__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.1em 0.35em;
+    margin-block-start: clamp(2rem, 1rem + 4vw, 4rem);
+    font-size: var(--text-hero);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  [dir='rtl'] .case__title {
+    font-size: calc(var(--text-hero) * 0.8);
+    line-height: 1.35;
+    letter-spacing: 0;
+  }
+
+  .case__alt-name {
+    font-size: 0.36em;
+    font-weight: 600;
+    color: var(--apricot);
+    letter-spacing: 0;
+  }
+
+  .case__summary {
+    max-width: 46ch;
+    margin-block-start: var(--space-6);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+
+  .case__meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: var(--space-5) var(--space-6);
+    margin-block: var(--space-8) 0;
+    padding-block-start: var(--space-5);
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .case__meta dt {
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .case__meta dd {
+    margin: 0.25rem 0 0;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  .case__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-7);
+  }
+
+  /* ---------- Body ---------- */
+
+  .case__body {
+    display: grid;
+    gap: var(--space-8);
+    padding-block: var(--section-pad);
+  }
+
+  .case__block {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .case__block h2,
+  .case__challenges-title {
+    font-size: var(--text-2xl);
+  }
+
+  .case__prose {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 42rem;
+  }
+
+  .case__prose--lead p:first-child {
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+  }
+
+  .case__prose p:not(:first-child) {
+    color: var(--fg-muted);
+  }
+
+  .case__list {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 42rem;
+  }
+
+  .case__list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9em;
+  }
+
+  .case__list .nuqta {
+    font-size: 0.8em;
+    color: var(--accent-warm);
+    translate: 0 -0.1em;
+  }
+
+  .case__list--outcome {
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+  }
+
+  .case__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block-start: var(--space-3);
+  }
+
+  [dir='rtl'] .case__stack {
+    justify-content: flex-end;
+  }
+
+  .case__stack li {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+
+  /* ---------- Hard parts ---------- */
+
+  .case__challenges {
+    display: grid;
+    gap: var(--space-8);
+    padding-block: var(--section-pad);
+  }
+
+  .challenge {
+    display: grid;
+    gap: var(--space-6);
+    padding-block-start: var(--space-6);
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .challenge__text {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .challenge h3 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    max-width: 22ch;
+  }
+
+  .challenge__text p {
+    max-width: 42rem;
+    color: var(--fg-muted);
+  }
+
+  /* ---------- Next project ---------- */
+
+  .case__next {
+    display: block;
+    padding-block: var(--space-8);
+    border-block-start: 1px solid var(--rule);
+    text-decoration: none;
+    transition:
+      background-color var(--dur) var(--ease-out),
+      color var(--dur) var(--ease-out);
+  }
+
+  .case__next-inner {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .case__next-label,
+  .case__next-tagline {
+    color: var(--fg-muted);
+    transition: color var(--dur) var(--ease-out);
+  }
+
+  .case__next-name {
+    width: fit-content;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 650;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.03em;
+    transition: translate var(--dur) var(--ease-out);
+  }
+
+  [dir='rtl'] .case__next-name {
+    letter-spacing: 0;
+  }
+
+  .case__next:hover,
+  .case__next:focus-visible {
+    background: var(--ghouta);
+    color: var(--jasmine);
+  }
+
+  .case__next:hover .case__next-label,
+  .case__next:hover .case__next-tagline,
+  .case__next:focus-visible .case__next-label,
+  .case__next:focus-visible .case__next-tagline {
+    color: var(--sage);
+  }
+
+  .case__next:hover .case__next-name,
+  .case__next:focus-visible .case__next-name {
+    translate: calc(var(--dir) * 0.75rem) 0;
+  }
+
+  @media (min-width: 60rem) {
+    .case__block {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      column-gap: var(--space-7);
+      align-items: start;
+    }
+
+    .challenge__text {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      column-gap: var(--space-7);
+      align-items: start;
+    }
+  }
+</style>

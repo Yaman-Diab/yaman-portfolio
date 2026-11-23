@@ -1,0 +1,196 @@
+import type { Locale } from '@/domain/entities/locale';
+
+/**
+ * Interface labels: navigation, buttons, headings that belong to the page
+ * rather than to Yaman's content. Portfolio content lives in src/data.
+ */
+const en = {
+  /** Joins two short phrases. Arabic has its own comma. */
+  comma: ', ',
+  skip: 'Skip to content',
+  navLabel: 'Sections',
+  nav: { work: 'Work', about: 'About', experience: 'Experience', contact: 'Contact' },
+  switchLanguage: 'العربية',
+  switchLanguageLabel: 'Switch to Arabic',
+  hero: { primaryAction: 'See selected work', secondaryAction: 'Get in touch' },
+  work: {
+    title: 'Selected work',
+    intro: 'Four projects, each told through its hardest problems.',
+    open: 'Read the case study',
+  },
+  about: { principlesTitle: 'How I work', photoAlt: 'Portrait of Yaman Diab' },
+  expertise: {
+    title: 'What I bring to a project',
+    intro: 'Grouped by the kind of problem, with the tools I have used for each.',
+    toolsLabel: 'Tools',
+  },
+  career: { educationTitle: 'Education', timelineTitle: 'Timeline', caseStudy: 'Case study' },
+  recognition: { title: 'Recognition' },
+  contact: {
+    email: 'Email',
+    phone: 'Phone',
+    location: 'Location',
+    copy: 'Copy',
+    copied: 'Copied',
+    copyEmailLabel: 'Copy the email address',
+  },
+  footer: { source: 'Source code of this site', rights: '© 2026 Yaman Diab', stack: 'Built with Astro, hosted on GitHub Pages.' },
+  caseStudy: {
+    back: 'All work',
+    role: 'Role',
+    status: 'Status',
+    year: 'Year',
+    platforms: 'Platform',
+    problem: 'The problem',
+    myPart: 'My part',
+    challenges: 'The hard parts',
+    architecture: 'Architecture and stack',
+    outcome: 'Where it stands',
+    next: 'Next project',
+  },
+  syncDemo: {
+    title: 'Try the answer queue',
+    note: 'A simplified model of the app’s sync queue, running in your browser.',
+    connection: 'Connection',
+    online: 'Online',
+    offline: 'Offline',
+    goOffline: 'Go offline',
+    goOnline: 'Go online',
+    answer: 'Answer a question',
+    resend: 'Send the last request again',
+    phone: 'On the phone',
+    server: 'On the server',
+    empty: 'No answers yet.',
+    waiting: 'Waiting',
+    synced: 'Synced',
+    counted: 'Answers counted',
+    logQueued: 'Attempt {id} is waiting until the phone is back online.',
+    logSynced: 'Attempt {id} synced.',
+    logFlushed: 'Back online. Waiting answers synced: {count}.',
+    logDuplicate: 'The server already has {id}. It is still counted once.',
+    logOffline: 'Offline. New answers will wait in the queue.',
+    logOnline: 'Online. Nothing was waiting.',
+  },
+  verificationDemo: {
+    title: 'Walk through the verification screen',
+    note: 'One screen, four states. The buttons stand in for the citizen and the reviewer.',
+    stateLabel: 'Current state',
+    states: {
+      form: { name: 'Form', body: 'The citizen enters a national ID number and adds photos of the document.' },
+      pending: { name: 'Waiting for review', body: 'The documents are with a reviewer. Nothing can be edited.' },
+      rejected: { name: 'Rejected', body: 'The request was turned down. The citizen can send the documents again.' },
+      approved: { name: 'Approved', body: 'The account is verified, and the protected services open.' },
+    },
+    actions: {
+      submit: 'Send documents',
+      approve: 'Reviewer approves',
+      reject: 'Reviewer rejects',
+      resubmit: 'Send again',
+      reset: 'Start over',
+    },
+  },
+  notFound: {
+    title: 'This page does not exist',
+    body: 'The link may be old, or the address may have a typo.',
+    home: 'Go to the home page',
+  },
+};
+
+export type UiStrings = typeof en;
+
+const ar: UiStrings = {
+  comma: '، ',
+  skip: 'انتقل إلى المحتوى',
+  navLabel: 'الأقسام',
+  nav: { work: 'الأعمال', about: 'نبذة', experience: 'الخبرة', contact: 'تواصل' },
+  switchLanguage: 'English',
+  switchLanguageLabel: 'التبديل إلى الإنكليزية',
+  hero: { primaryAction: 'شاهد الأعمال المختارة', secondaryAction: 'تواصل معي' },
+  work: {
+    title: 'أعمال مختارة',
+    intro: 'أربعة مشاريع، كلٌّ منها يُروى من خلال أصعب مشكلاته.',
+    open: 'اقرأ دراسة الحالة',
+  },
+  about: { principlesTitle: 'كيف أعمل', photoAlt: 'صورة شخصية ليمان دياب' },
+  expertise: {
+    title: 'ما أضيفه إلى المشروع',
+    intro: 'مرتّب حسب نوع المشكلة، مع الأدوات التي استخدمتها في كل نوع.',
+    toolsLabel: 'الأدوات',
+  },
+  career: { educationTitle: 'التعليم', timelineTitle: 'المسار الزمني', caseStudy: 'دراسة الحالة' },
+  recognition: { title: 'إنجازات' },
+  contact: {
+    email: 'البريد الإلكتروني',
+    phone: 'الهاتف',
+    location: 'الموقع',
+    copy: 'نسخ',
+    copied: 'تم النسخ',
+    copyEmailLabel: 'انسخ عنوان البريد الإلكتروني',
+  },
+  footer: { source: 'الكود المصدري لهذا الموقع', rights: '© 2026 يمان دياب', stack: 'مبني بـ Astro ومستضاف على GitHub Pages.' },
+  caseStudy: {
+    back: 'كل الأعمال',
+    role: 'الدور',
+    status: 'الحالة',
+    year: 'السنة',
+    platforms: 'المنصّة',
+    problem: 'المشكلة',
+    myPart: 'دوري',
+    challenges: 'الأجزاء الصعبة',
+    architecture: 'المعمارية والتقنيات',
+    outcome: 'أين وصل المشروع',
+    next: 'المشروع التالي',
+  },
+  syncDemo: {
+    title: 'جرّب طابور الإجابات',
+    note: 'نموذج مبسّط لطابور المزامنة في التطبيق، يعمل داخل متصفّحك.',
+    connection: 'الاتصال',
+    online: 'متصل',
+    offline: 'غير متصل',
+    goOffline: 'اقطع الاتصال',
+    goOnline: 'أعد الاتصال',
+    answer: 'أجب عن سؤال',
+    resend: 'أعد إرسال آخر طلب',
+    phone: 'على الهاتف',
+    server: 'على الخادم',
+    empty: 'لا توجد إجابات بعد.',
+    waiting: 'تنتظر',
+    synced: 'تمّت المزامنة',
+    counted: 'الإجابات المحسوبة',
+    logQueued: 'المحاولة {id} تنتظر حتى يعود الاتصال.',
+    logSynced: 'تمّت مزامنة المحاولة {id}.',
+    logFlushed: 'عاد الاتصال. عدد الإجابات التي تمّت مزامنتها: {count}.',
+    logDuplicate: 'الخادم لديه المحاولة {id} من قبل. ما زالت محسوبة مرة واحدة.',
+    logOffline: 'لا يوجد اتصال. الإجابات الجديدة ستنتظر في الطابور.',
+    logOnline: 'عاد الاتصال. لم يكن هناك ما ينتظر.',
+  },
+  verificationDemo: {
+    title: 'تنقّل بين حالات شاشة التوثيق',
+    note: 'شاشة واحدة وأربع حالات. الأزرار تمثّل المواطن والمراجِع.',
+    stateLabel: 'الحالة الحالية',
+    states: {
+      form: { name: 'النموذج', body: 'يُدخل المواطن الرقم الوطني ويضيف صور الوثيقة.' },
+      pending: { name: 'بانتظار المراجعة', body: 'الوثائق عند المراجِع، ولا يمكن تعديل شيء.' },
+      rejected: { name: 'مرفوض', body: 'رُفض الطلب، ويستطيع المواطن إرسال الوثائق من جديد.' },
+      approved: { name: 'موافَق عليه', body: 'الحساب موثّق، والخدمات المحمية أصبحت متاحة.' },
+    },
+    actions: {
+      submit: 'أرسل الوثائق',
+      approve: 'المراجِع يوافق',
+      reject: 'المراجِع يرفض',
+      resubmit: 'أرسل من جديد',
+      reset: 'ابدأ من البداية',
+    },
+  },
+  notFound: {
+    title: 'هذه الصفحة غير موجودة',
+    body: 'ربما كان الرابط قديماً، أو في العنوان خطأ إملائي.',
+    home: 'اذهب إلى الصفحة الرئيسية',
+  },
+};
+
+const strings: Record<Locale, UiStrings> = { en, ar };
+
+export function useUi(locale: Locale): UiStrings {
+  return strings[locale];
+}

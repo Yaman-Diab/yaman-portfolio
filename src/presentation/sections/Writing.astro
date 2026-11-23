@@ -1,0 +1,77 @@
+---
+import type { Writing } from '@/domain/entities/career';
+
+interface Props {
+  writing: Writing;
+}
+
+const { writing } = Astro.props;
+---
+
+<section class="section theme-paper" id="writing">
+  <div class="wrap writing">
+    <header class="writing__head">
+      <h2 class="section__title">{writing.title}</h2>
+      <p class="section__intro">{writing.intro}</p>
+      <a class="button button--ghost" href={writing.link.url} rel="noopener">{writing.link.label}</a>
+    </header>
+
+    <ul class="writing__list">
+      {
+        writing.topics.map((topic) => (
+          <li>
+            <h3>{topic.title}</h3>
+            <p>{topic.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .writing {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .writing__head {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+    justify-items: start;
+  }
+
+  .writing__head .button {
+    margin-block-start: var(--space-3);
+  }
+
+  .writing__list {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .writing__list li {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-5);
+    border-block-end: 1px solid var(--rule);
+  }
+
+  .writing__list h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    letter-spacing: -0.01em;
+  }
+
+  .writing__list p {
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 60rem) {
+    .writing {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      column-gap: var(--space-9);
+    }
+  }
+</style>

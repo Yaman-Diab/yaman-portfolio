@@ -1,0 +1,32 @@
+{
+  "name": "yaman-portfolio",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio of Yaman Diab, Flutter developer. Static site for GitHub Pages.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "og": "node scripts/generate-og.mjs",
+    "qa": "node scripts/check-dist.mjs"
+  },
+  "engines": {
+    "node": ">=20.3.0"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.6",
+    "@fontsource-variable/bricolage-grotesque": "5.3.0",
+    "@fontsource-variable/fustat": "5.3.0",
+    "@fontsource-variable/ibm-plex-sans": "5.3.0",
+    "@fontsource/ibm-plex-sans-arabic": "5.3.0",
+    "astro": "5.18.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "sharp": "0.35.5",
+    "typescript": "5.9.3",
+    "wawoff2": "2.0.1"
+  }
+}

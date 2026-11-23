@@ -1,0 +1,187 @@
+---
+import type { Flow } from '@/domain/entities/project';
+
+interface Props {
+  flow: Flow;
+}
+
+const { flow } = Astro.props;
+const lastIndex = flow.nodes.length - 1;
+---
+
+<figure class="flow" data-inview style={`--n:${flow.nodes.length}`}>
+  <ol class="flow__track">
+    {
+      flow.nodes.map((node, index) => (
+        <li class="flow__node" style={`--i:${index}`}>
+          <span class="flow__label">{node.label}</span>
+          {node.detail && <span class="flow__detail">{node.detail}</span>}
+          {index < lastIndex && (
+            <span class="flow__link" aria-hidden="true">
+              <span class="flow__packet" />
+            </span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+  {flow.caption && <figcaption>{flow.caption}</figcaption>}
+</figure>
+
+<style>
+  .flow {
+    --gap: 2.25rem;
+    /* Where a packet travels: down the page on phones, along the row on wide screens. */
+    --travel-x: 0px;
+    --travel-y: var(--gap);
+    margin: 0;
+  }
+
+  .flow__track {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  .flow__node {
+    position: relative;
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: var(--space-4);
+    border: 1.5px solid var(--fg);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .flow__label {
+    font-family: var(--font-display);
+    font-weight: 650;
+    line-height: var(--leading-snug);
+  }
+
+  .flow__detail {
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+
+  /* The connector to the next step. */
+  .flow__link {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-start: 1.75rem;
+    inline-size: 2px;
+    block-size: var(--gap);
+    background: var(--fg);
+  }
+
+  /* Arrowhead: two borders of a small square, turned to point along the flow. */
+  .flow__link::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 1px;
+    inset-inline-start: 50%;
+    width: 9px;
+    height: 9px;
+    border-block-end: 2px solid var(--fg);
+    border-inline-end: 2px solid var(--fg);
+    transform: translateX(calc(var(--dir) * -50%)) rotate(calc(var(--dir) * 45deg));
+  }
+
+  .flow__packet {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 50%;
+    width: 10px;
+    height: 10px;
+    margin: -5px;
+    background: var(--apricot);
+    outline: 2px solid var(--bg);
+    transform: rotate(45deg);
+    opacity: 0;
+  }
+
+  figcaption {
+    margin-block-start: var(--space-4);
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  @media (min-width: 48rem) {
+    .flow {
+      --gap: clamp(1.75rem, 3.6vw, 3rem);
+      --travel-x: calc(var(--dir) * var(--gap));
+      --travel-y: 0px;
+    }
+
+    .flow__track {
+      flex-direction: row;
+    }
+
+    .flow__link {
+      inset-block-start: 50%;
+      inset-inline-start: 100%;
+      inline-size: var(--gap);
+      block-size: 2px;
+      margin-block-start: -1px;
+    }
+
+    .flow__link::after {
+      inset-block-end: auto;
+      inset-block-start: 50%;
+      inset-inline-start: auto;
+      inset-inline-end: 1px;
+      border-block-end: 0;
+      border-block-start: 2px solid var(--fg);
+      transform: translateY(-50%) rotate(calc(var(--dir) * 45deg));
+    }
+
+    .flow__packet {
+      inset-block-start: 50%;
+      inset-inline-start: 0;
+    }
+  }
+
+  /* Steps arrive one after another, then packets keep travelling the chain. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .flow .flow__node {
+      opacity: 0;
+      translate: 0 0.75rem;
+      transition:
+        opacity var(--dur) var(--ease-out),
+        translate var(--dur-slow) var(--ease-out);
+      transition-delay: calc(var(--i) * 110ms);
+    }
+
+    :global(.js) .flow.is-inview .flow__node {
+      opacity: 1;
+      translate: 0 0;
+    }
+
+    .flow.is-inview .flow__packet {
+      animation: travel calc(var(--n) * 0.8s) linear infinite;
+      animation-delay: calc(0.6s + var(--i) * 0.8s);
+    }
+  }
+
+  @keyframes travel {
+    0% {
+      opacity: 0;
+      translate: 0 0;
+    }
+    3% {
+      opacity: 1;
+    }
+    17% {
+      opacity: 1;
+    }
+    20%,
+    100% {
+      opacity: 0;
+      translate: var(--travel-x) var(--travel-y);
+    }
+  }
+</style>

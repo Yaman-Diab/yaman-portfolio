@@ -1,0 +1,76 @@
+---
+import { portfolioRepository } from '@/app/container';
+import { routes } from '@/app/routes';
+import BaseLayout from '@/presentation/layouts/BaseLayout.astro';
+import { useUi } from '@/presentation/i18n/ui';
+
+// GitHub Pages serves this one file for every unknown address, so it speaks both languages.
+const profile = portfolioRepository.getProfile('en');
+const en = useUi('en').notFound;
+const ar = useUi('ar').notFound;
+---
+
+<BaseLayout locale="en" title={en.title} description={en.body} profile={profile} pathFor={routes.home}>
+  <section class="missing theme-green">
+    <div class="wrap">
+      <p class="missing__code" aria-hidden="true">404</p>
+      <div class="missing__copy">
+        <div>
+          <h1>{en.title}</h1>
+          <p>{en.body}</p>
+          <a class="button button--primary" href={routes.home('en')}>{en.home}</a>
+        </div>
+        <div lang="ar" dir="rtl">
+          <h2>{ar.title}</h2>
+          <p>{ar.body}</p>
+          <a class="button button--ghost" href={routes.home('ar')}>{ar.home}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .missing {
+    padding-block: var(--section-pad);
+  }
+
+  .missing__code {
+    font-family: var(--font-display);
+    font-size: var(--text-hero);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--apricot);
+  }
+
+  .missing__copy {
+    display: grid;
+    gap: var(--space-7);
+    margin-block-start: var(--space-7);
+    padding-block-start: var(--space-6);
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .missing__copy > div {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+    align-content: start;
+  }
+
+  .missing h1,
+  .missing h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .missing p:not(.missing__code) {
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 48rem) {
+    .missing__copy {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import type { ExpertiseGroup } from '@/domain/entities/career';
+import type { Locale } from '@/domain/entities/locale';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  groups: ExpertiseGroup[];
+}
+
+const { locale, groups } = Astro.props;
+const t = useUi(locale);
+---
+
+<section class="section theme-green" id="expertise">
+  <div class="wrap">
+    <header class="expertise__head">
+      <h2 class="section__title">{t.expertise.title}</h2>
+      <p class="section__intro">{t.expertise.intro}</p>
+    </header>
+
+    <ul class="expertise__list">
+      {
+        groups.map((group) => (
+          <li class="expertise__item">
+            <h3>{group.title}</h3>
+            <div class="expertise__text">
+              <p>{group.body}</p>
+              <p class="expertise__tools" dir="ltr" lang="en">
+                <span class="visually-hidden">{t.expertise.toolsLabel}: </span>
+                {group.tools.join(', ')}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .expertise__head {
+    display: grid;
+    gap: var(--space-4);
+    margin-block-end: var(--space-7);
+  }
+
+  .expertise__list {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .expertise__item {
+    display: grid;
+    gap: var(--space-3);
+    padding-block: var(--space-6);
+    border-block-end: 1px solid var(--rule);
+  }
+
+  .expertise__item h3 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+  }
+
+  .expertise__text {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 44rem;
+  }
+
+  /* Tool names are Latin in both languages, so they keep their own direction. */
+  .expertise__tools {
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+    text-align: start;
+    unicode-bidi: plaintext;
+  }
+
+  [dir='rtl'] .expertise__tools {
+    text-align: end;
+  }
+
+  @media (min-width: 56rem) {
+    .expertise__item {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      column-gap: var(--space-7);
+      align-items: baseline;
+    }
+  }
+</style>

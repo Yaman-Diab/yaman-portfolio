@@ -1,0 +1,166 @@
+---
+import { Picture } from 'astro:assets';
+import portrait from '@/assets/yaman-diab.webp';
+import type { Locale } from '@/domain/entities/locale';
+import type { Profile } from '@/domain/entities/profile';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  profile: Profile;
+}
+
+const { locale, profile } = Astro.props;
+const t = useUi(locale);
+const [lead, ...rest] = profile.about;
+---
+
+<section class="section theme-paper" id="about">
+  <div class="wrap">
+    <div class="about">
+      <div class="about__portrait">
+        <Picture
+          src={portrait}
+          alt={t.about.photoAlt}
+          formats={['avif', 'webp']}
+          fallbackFormat="jpg"
+          width={880}
+          widths={[320, 480, 640, 880]}
+          sizes="(min-width: 56rem) 26rem, (min-width: 30rem) 20rem, 70vw"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+
+      <div class="about__text">
+        <h2 class="section__title about__title">{profile.aboutTitle}</h2>
+        <p class="about__lead">{lead}</p>
+        {rest.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    </div>
+
+    <div class="principles" data-inview>
+      <h3 class="principles__title">{t.about.principlesTitle}</h3>
+      <ul class="principles__list">
+        {
+          profile.principles.map((principle, index) => (
+            <li data-reveal style={`--i:${index}`}>
+              <span class="nuqta" aria-hidden="true" />
+              <h4>{principle.title}</h4>
+              <p>{principle.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  /* An arch, after the doorways and windows of old Damascus houses. */
+  .about__portrait {
+    width: min(100%, 20rem);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 999px 999px var(--radius-lg) var(--radius-lg);
+    background: var(--jasmine-dim);
+  }
+
+  .about__portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+
+  .about__text {
+    display: grid;
+    gap: var(--space-5);
+    max-width: 38rem;
+  }
+
+  .about__title {
+    max-width: 16ch;
+    margin-block-end: var(--space-3);
+  }
+
+  .about__lead {
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+  }
+
+  .about__text p:not(.about__lead) {
+    color: var(--fg-muted);
+  }
+
+  .principles {
+    margin-block-start: var(--space-9);
+    padding-block-start: var(--space-6);
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .principles__title {
+    font-size: var(--text-lg);
+    color: var(--fg-muted);
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .principles__list {
+    display: grid;
+    gap: var(--space-6);
+    margin-block-start: var(--space-6);
+  }
+
+  .principles__list li {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+
+  .principles__list .nuqta {
+    color: var(--apricot-deep);
+    margin-block-end: var(--space-3);
+  }
+
+  .principles__list h4 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    letter-spacing: -0.01em;
+  }
+
+  [dir='rtl'] .principles__list h4 {
+    letter-spacing: 0;
+  }
+
+  .principles__list p {
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 44rem) {
+    .principles__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-7);
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .about {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--space-8);
+    }
+
+    .about__portrait {
+      width: min(100%, 26rem);
+    }
+  }
+</style>

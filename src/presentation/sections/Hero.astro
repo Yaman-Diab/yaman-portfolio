@@ -1,0 +1,267 @@
+---
+import { routes } from '@/app/routes';
+import type { Locale } from '@/domain/entities/locale';
+import type { Profile } from '@/domain/entities/profile';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  profile: Profile;
+}
+
+const { locale, profile } = Astro.props;
+const t = useUi(locale);
+
+// The page's own script leads; the other script answers from the far side.
+const names = {
+  primary: locale === 'ar' ? { text: profile.nameArabic, lang: 'ar' } : { text: profile.nameLatin, lang: 'en' },
+  secondary: locale === 'ar' ? { text: profile.nameLatin, lang: 'en' } : { text: profile.nameArabic, lang: 'ar' },
+};
+---
+
+<section class="hero theme-green">
+  <div class="wrap">
+    <h1 class="lockup">
+      <span class="lockup__name lockup__name--primary" lang={names.primary.lang}>{names.primary.text}</span>
+      <span class="lockup__rule" aria-hidden="true">
+        <span class="lockup__runner"><span class="nuqta"></span></span>
+      </span>
+      <span
+        class="lockup__name lockup__name--secondary"
+        lang={names.secondary.lang}
+        dir={names.secondary.lang === 'ar' ? 'rtl' : 'ltr'}
+        aria-hidden="true">{names.secondary.text}</span
+      >
+    </h1>
+
+    <div class="hero__body">
+      <div class="hero__lead">
+        <p class="hero__positioning">{profile.positioning}</p>
+        <div class="hero__actions">
+          <a class="button button--primary" href={routes.section(locale, 'work')}>{t.hero.primaryAction}</a>
+          <a class="button button--ghost" href={routes.section(locale, 'contact')}>{t.hero.secondaryAction}</a>
+        </div>
+      </div>
+
+      <ul class="hero__facts">
+        {
+          profile.facts.map((fact) => (
+            <li>
+              <span class="nuqta" aria-hidden="true" />
+              <span>{fact}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(2.5rem, 1.5rem + 5vw, 6rem) clamp(3.5rem, 2rem + 6vw, 7.5rem);
+    overflow: clip;
+  }
+
+  /* ---------- Name lockup: two scripts, two directions, one line ---------- */
+
+  .lockup {
+    display: grid;
+    font-weight: 700;
+    line-height: 0.92;
+  }
+
+  .lockup__name {
+    display: block;
+    width: fit-content;
+    padding-block: 0.08em;
+    white-space: nowrap;
+  }
+
+  .lockup__name--primary {
+    justify-self: start;
+    font-size: var(--text-hero);
+    letter-spacing: -0.04em;
+  }
+
+  .lockup__name--secondary {
+    justify-self: end;
+    font-size: calc(var(--text-hero) * 0.46);
+    font-weight: 600;
+    color: var(--apricot);
+    letter-spacing: -0.03em;
+  }
+
+  /* Arabic sits taller and deeper than Latin, and must not be tracked. */
+  .lockup__name[lang='ar'] {
+    line-height: 1.35;
+    letter-spacing: 0;
+    padding-block: 0;
+  }
+
+  .lockup__name--primary[lang='ar'] {
+    font-size: calc(var(--text-hero) * 0.86);
+  }
+
+  .lockup__name--secondary[lang='ar'] {
+    font-size: calc(var(--text-hero) * 0.42);
+  }
+
+  .lockup__rule {
+    position: relative;
+    display: block;
+    height: 2px;
+    margin-block: clamp(0.5rem, 1.4vw, 1.25rem);
+    background: var(--rule);
+    transform-origin: left center;
+  }
+
+  [dir='rtl'] .lockup__rule {
+    transform-origin: right center;
+  }
+
+  /* A nuqta travels the line between the two names, there and back. */
+  .lockup__runner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    color: var(--apricot);
+    font-size: clamp(1rem, 0.7rem + 1vw, 1.5rem);
+  }
+
+  /* ---------- Body ---------- */
+
+  .hero__body {
+    display: grid;
+    gap: var(--space-7);
+    margin-block-start: clamp(2rem, 1rem + 4vw, 4.5rem);
+  }
+
+  .hero__positioning {
+    max-width: 32ch;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  [dir='rtl'] .hero__positioning {
+    letter-spacing: 0;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-6);
+  }
+
+  .hero__facts {
+    display: grid;
+    gap: var(--space-3);
+    align-content: end;
+    color: var(--fg-muted);
+  }
+
+  .hero__facts li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75em;
+  }
+
+  .hero__facts .nuqta {
+    color: var(--apricot);
+    font-size: 0.8em;
+    translate: 0 -0.1em;
+  }
+
+  @media (min-width: 56rem) {
+    .hero__body {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      justify-content: space-between;
+      column-gap: var(--space-8);
+    }
+  }
+
+  /* ---------- Load sequence: each name is written in its own direction ---------- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lockup__name:not([lang='ar']) {
+      animation: write-ltr 900ms var(--ease-out) 120ms both;
+    }
+
+    .lockup__name[lang='ar'] {
+      animation: write-rtl 900ms var(--ease-out) 120ms both;
+    }
+
+    .lockup__name--secondary:not([lang='ar']),
+    .lockup__name--secondary[lang='ar'] {
+      animation-delay: 520ms;
+    }
+
+    .lockup__rule {
+      animation: draw-rule 800ms var(--ease-in-out) 320ms both;
+    }
+
+    .lockup__runner {
+      animation:
+        fade-in 400ms ease 1100ms both,
+        run-line 9s var(--ease-in-out) 1500ms infinite alternate;
+    }
+
+    .hero__lead,
+    .hero__facts {
+      animation: rise 800ms var(--ease-out) 900ms both;
+    }
+
+    .hero__facts {
+      animation-delay: 1050ms;
+    }
+  }
+
+  @keyframes write-ltr {
+    from {
+      clip-path: inset(-0.3em 100% -0.3em 0);
+    }
+    to {
+      clip-path: inset(-0.3em -0.1em -0.3em 0);
+    }
+  }
+
+  @keyframes write-rtl {
+    from {
+      clip-path: inset(-0.3em 0 -0.3em 100%);
+    }
+    to {
+      clip-path: inset(-0.3em 0 -0.3em -0.1em);
+    }
+  }
+
+  @keyframes draw-rule {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes run-line {
+    to {
+      transform: translateX(calc(var(--dir) * (100% - 0.5em)));
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 1.25rem;
+    }
+  }
+</style>

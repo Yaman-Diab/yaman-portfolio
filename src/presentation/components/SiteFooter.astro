@@ -1,0 +1,157 @@
+---
+import type { Locale } from '@/domain/entities/locale';
+import type { Profile } from '@/domain/entities/profile';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  profile: Profile;
+}
+
+const { locale, profile } = Astro.props;
+const t = useUi(locale);
+const { contact } = profile;
+---
+
+<footer class="contact theme-green" id="contact">
+  <div class="wrap">
+    <h2 class="contact__title">{profile.contactTitle}</h2>
+    <p class="contact__body">{profile.contactBody}</p>
+
+    <div class="contact__email">
+      <a class="contact__address" href={`mailto:${contact.email}`} dir="ltr">{contact.email}</a>
+      <button
+        class="button button--ghost contact__copy"
+        type="button"
+        data-copy={contact.email}
+        data-copied={t.contact.copied}
+        aria-label={t.contact.copyEmailLabel}
+      >
+        <span data-copy-label aria-live="polite">{t.contact.copy}</span>
+      </button>
+    </div>
+
+    <dl class="contact__details">
+      <div>
+        <dt>{t.contact.phone}</dt>
+        <dd><a href={`tel:${contact.phone}`} dir="ltr">{contact.phoneDisplay}</a></dd>
+      </div>
+      <div>
+        <dt>GitHub</dt>
+        <dd><a href={contact.github} rel="me noopener" dir="ltr">github.com/Yaman-Diab</a></dd>
+      </div>
+      <div>
+        <dt>LinkedIn</dt>
+        <dd><a href={contact.linkedin} rel="me noopener" dir="ltr">linkedin.com/in/yaman-diab</a></dd>
+      </div>
+      <div>
+        <dt>{t.contact.location}</dt>
+        <dd>{profile.location}</dd>
+      </div>
+    </dl>
+
+    <div class="contact__foot">
+      <p>{t.footer.rights}</p>
+      <p>
+        {t.footer.stack}
+        <a href={contact.siteRepository} rel="noopener">{t.footer.source}</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .contact {
+    padding-block: var(--section-pad) var(--space-6);
+  }
+
+  .contact__title {
+    max-width: 20ch;
+    font-size: var(--text-3xl);
+  }
+
+  .contact__body {
+    margin-block-start: var(--space-5);
+    color: var(--fg-muted);
+    font-size: var(--text-lg);
+  }
+
+  .contact__email {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4) var(--space-5);
+    margin-block-start: var(--space-7);
+  }
+
+  .contact__address {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 0.6rem + 4.2vw, 3.75rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--apricot);
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.18em;
+    overflow-wrap: anywhere;
+    transition: text-decoration-color var(--dur) ease;
+  }
+
+  .contact__address:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .contact__copy.is-copied {
+    border-color: var(--leaf);
+    color: var(--leaf);
+  }
+
+  .contact__details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--space-5) var(--space-6);
+    margin-block: var(--space-8) 0;
+    padding-block-start: var(--space-6);
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .contact__details dt {
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .contact__details dd {
+    margin: 0.2rem 0 0;
+    font-weight: 500;
+    /* Latin handles and numbers keep their own direction but align with the page. */
+    text-align: start;
+  }
+
+  .contact__details a {
+    display: inline-block;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    transition: text-decoration-color var(--dur-fast) ease;
+  }
+
+  .contact__details a:hover {
+    text-decoration-color: var(--apricot);
+  }
+
+  .contact__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-6);
+    margin-block-start: var(--space-8);
+    padding-block-start: var(--space-5);
+    border-block-start: 1px solid var(--rule);
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .contact__foot a:hover {
+    color: var(--fg);
+  }
+</style>

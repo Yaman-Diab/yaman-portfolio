@@ -1,0 +1,313 @@
+---
+import type { UiStrings } from '@/presentation/i18n/ui';
+
+interface Props {
+  strings: UiStrings['syncDemo'];
+}
+
+const { strings } = Astro.props;
+---
+
+<section class="demo" data-sync-demo data-strings={JSON.stringify(strings)} aria-label={strings.title}>
+  <header class="demo__head">
+    <h4>{strings.title}</h4>
+    <p>{strings.note}</p>
+  </header>
+
+  <div class="demo__controls">
+    <p class="demo__connection">
+      {strings.connection}:
+      <strong data-connection class="is-online">
+        <span class="nuqta" aria-hidden="true"></span>
+        <span data-connection-label>{strings.online}</span>
+      </strong>
+    </p>
+    <div class="demo__buttons">
+      <button type="button" class="button button--primary" data-action="answer">{strings.answer}</button>
+      <button type="button" class="button button--ghost" data-action="toggle">{strings.goOffline}</button>
+      <button type="button" class="button button--ghost" data-action="resend" disabled>{strings.resend}</button>
+    </div>
+  </div>
+
+  <div class="demo__panes">
+    <div class="demo__pane">
+      <h5>{strings.phone}</h5>
+      <ul data-queue>
+        <li class="demo__empty">{strings.empty}</li>
+      </ul>
+    </div>
+    <div class="demo__pane">
+      <h5>{strings.server}</h5>
+      <p class="demo__count">
+        {strings.counted}: <strong data-count>0</strong>
+      </p>
+      <ul data-server class="demo__server"></ul>
+    </div>
+  </div>
+
+  <p class="demo__log" data-log role="status" aria-live="polite"></p>
+</section>
+
+<script>
+  interface Strings {
+    online: string;
+    offline: string;
+    goOffline: string;
+    goOnline: string;
+    empty: string;
+    waiting: string;
+    synced: string;
+    logQueued: string;
+    logSynced: string;
+    logFlushed: string;
+    logDuplicate: string;
+    logOffline: string;
+    logOnline: string;
+  }
+
+  interface Attempt {
+    id: string;
+    synced: boolean;
+  }
+
+  const MAX_ROWS = 5;
+
+  function fill(template: string, values: Record<string, string | number>): string {
+    return template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''));
+  }
+
+  function mount(root: HTMLElement): void {
+    const strings = JSON.parse(root.dataset.strings ?? '{}') as Strings;
+    const queueList = root.querySelector<HTMLElement>('[data-queue]')!;
+    const serverList = root.querySelector<HTMLElement>('[data-server]')!;
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const log = root.querySelector<HTMLElement>('[data-log]')!;
+    const connection = root.querySelector<HTMLElement>('[data-connection]')!;
+    const connectionLabel = root.querySelector<HTMLElement>('[data-connection-label]')!;
+    const toggle = root.querySelector<HTMLButtonElement>('[data-action="toggle"]')!;
+    const resend = root.querySelector<HTMLButtonElement>('[data-action="resend"]')!;
+    const answer = root.querySelector<HTMLButtonElement>('[data-action="answer"]')!;
+
+    let online = true;
+    let nextNumber = 1;
+    let attempts: Attempt[] = [];
+    // The server keeps every ID it has seen. That set is what makes a repeat harmless.
+    const serverIds = new Set<string>();
+    let lastSent: string | undefined;
+
+    const send = (attempt: Attempt): boolean => {
+      const isNew = !serverIds.has(attempt.id);
+      serverIds.add(attempt.id);
+      attempt.synced = true;
+      lastSent = attempt.id;
+      return isNew;
+    };
+
+    const render = (flashId?: string): void => {
+      queueList.replaceChildren(
+        ...(attempts.length === 0
+          ? [Object.assign(document.createElement('li'), { className: 'demo__empty', textContent: strings.empty })]
+          : attempts.slice(-MAX_ROWS).map((attempt) => {
+              const row = document.createElement('li');
+              row.className = attempt.synced ? 'is-synced' : 'is-waiting';
+              const id = Object.assign(document.createElement('span'), { textContent: attempt.id, dir: 'ltr' });
+              const state = Object.assign(document.createElement('span'), {
+                textContent: attempt.synced ? strings.synced : strings.waiting,
+              });
+              row.append(id, state);
+              return row;
+            })),
+      );
+
+      serverList.replaceChildren(
+        ...[...serverIds].slice(-MAX_ROWS).map((id) => {
+          const row = Object.assign(document.createElement('li'), { textContent: id, dir: 'ltr' });
+          if (id === flashId) row.className = 'is-flash';
+          return row;
+        }),
+      );
+
+      count.textContent = String(serverIds.size);
+      connection.classList.toggle('is-online', online);
+      connectionLabel.textContent = online ? strings.online : strings.offline;
+      toggle.textContent = online ? strings.goOffline : strings.goOnline;
+      resend.disabled = !online || lastSent === undefined;
+    };
+
+    answer.addEventListener('click', () => {
+      const attempt: Attempt = { id: `a-${String(nextNumber++).padStart(2, '0')}`, synced: false };
+      attempts.push(attempt);
+      if (online) {
+        send(attempt);
+        log.textContent = fill(strings.logSynced, { id: attempt.id });
+      } else {
+        log.textContent = fill(strings.logQueued, { id: attempt.id });
+      }
+      render();
+    });
+
+    toggle.addEventListener('click', () => {
+      online = !online;
+      if (!online) {
+        log.textContent = strings.logOffline;
+      } else {
+        const waiting = attempts.filter((attempt) => !attempt.synced);
+        waiting.forEach(send);
+        log.textContent =
+          waiting.length > 0 ? fill(strings.logFlushed, { count: waiting.length }) : strings.logOnline;
+      }
+      render();
+    });
+
+    resend.addEventListener('click', () => {
+      if (!lastSent) return;
+      // Same ID again: the set already holds it, so the count does not move.
+      serverIds.add(lastSent);
+      log.textContent = fill(strings.logDuplicate, { id: lastSent });
+      render(lastSent);
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-sync-demo]').forEach(mount);
+</script>
+
+<style>
+  .demo {
+    display: grid;
+    gap: var(--space-5);
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1.5px solid var(--fg);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .demo__head {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .demo h4,
+  .demo h5 {
+    margin: 0;
+    font-family: var(--font-display);
+    line-height: var(--leading-snug);
+  }
+
+  .demo h4 {
+    font-size: var(--text-lg);
+    font-weight: 650;
+  }
+
+  .demo h5 {
+    font-size: var(--text-base);
+    font-weight: 600;
+  }
+
+  .demo__head p,
+  .demo__count {
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .demo__controls {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .demo__connection strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    color: var(--danger);
+  }
+
+  .demo__connection strong.is-online {
+    color: var(--ok);
+  }
+
+  .demo__connection .nuqta {
+    font-size: 0.8em;
+  }
+
+  .demo__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .demo__buttons .button {
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    font-size: var(--text-sm);
+  }
+
+  .demo__panes {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .demo__pane {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    min-height: 12.5rem;
+    padding: var(--space-4);
+    border-radius: var(--radius);
+    background: var(--bg);
+  }
+
+  .demo__pane ul {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .demo__pane :global(li) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: 0.4rem 0.7rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .demo__pane :global(li.demo__empty) {
+    background: transparent;
+    padding-inline: 0;
+    color: var(--fg-muted);
+  }
+
+  .demo__pane :global(li.is-waiting span:last-child) {
+    color: var(--accent-warm);
+    font-weight: 600;
+  }
+
+  .demo__pane :global(li.is-synced span:last-child) {
+    color: var(--ok);
+    font-weight: 600;
+  }
+
+  .demo__pane :global(li.is-flash) {
+    animation: flash 900ms var(--ease-out);
+  }
+
+  .demo__log {
+    min-height: 1.6em;
+    font-weight: 500;
+  }
+
+  @keyframes flash {
+    from {
+      background: var(--apricot);
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .demo__panes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

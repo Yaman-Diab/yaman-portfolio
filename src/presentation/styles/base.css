@@ -1,0 +1,307 @@
+@import './fonts.css';
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + 1rem);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ghouta);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 650;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* Arabic letters join, so tracking must stay at zero. */
+[dir='rtl'] h1,
+[dir='rtl'] h2,
+[dir='rtl'] h3,
+[lang='ar'] {
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent-warm, var(--apricot));
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--apricot);
+  color: var(--ink);
+}
+
+/* ---------- Layout primitives ---------- */
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--content) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-pad);
+}
+
+.section__title {
+  font-size: var(--text-2xl);
+  max-width: 18ch;
+}
+
+.section__intro {
+  max-width: 44ch;
+  color: var(--fg-muted);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(1rem, 2.5vw, 2.5rem);
+  row-gap: var(--space-7);
+}
+
+/* The nuqta: the rhombic dot of Arabic calligraphy. Used as the site's marker. */
+.nuqta {
+  display: inline-block;
+  flex: none;
+  width: 0.5em;
+  height: 0.5em;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 0.5rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--apricot);
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* ---------- Links and buttons ---------- */
+
+.link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color var(--dur-fast) ease;
+}
+
+.link:hover {
+  text-decoration-color: currentColor;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 3rem;
+  padding: 0.7rem 1.4rem;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.button--primary {
+  background: var(--apricot);
+  color: var(--ink);
+}
+
+.button--primary:hover {
+  background: #ffc373;
+}
+
+.button--ghost {
+  border-color: currentColor;
+  background: transparent;
+  color: var(--fg);
+}
+
+.button--ghost:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.button[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Scroll reveal ----------
+ * Content is visible by default. Only when scripts run does an element
+ * wait for its turn, so nothing is ever stuck hidden.
+ */
+
+.js [data-reveal] {
+  opacity: 0;
+  translate: 0 1rem;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    translate var(--dur-slow) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.js [data-reveal].is-inview,
+.js .is-inview [data-reveal] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* ---------- Page transitions ---------- */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition {
+  background: var(--ghouta-deep);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+  animation-timing-function: var(--ease-out);
+}
+
+/* Switching language turns the page over, like a sheet read from the other side. */
+html:active-view-transition-type(language)::view-transition-old(root) {
+  animation: 240ms var(--ease-in) both page-turn-out;
+}
+
+html:active-view-transition-type(language)::view-transition-new(root) {
+  animation: 460ms var(--ease-out) 240ms both page-turn-in;
+}
+
+@keyframes page-turn-out {
+  to {
+    transform: perspective(1800px) rotateY(calc(var(--dir) * -88deg));
+    opacity: 0.2;
+  }
+}
+
+@keyframes page-turn-in {
+  from {
+    transform: perspective(1800px) rotateY(calc(var(--dir) * -88deg));
+    opacity: 0.2;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .js [data-reveal] {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @view-transition {
+    navigation: none;
+  }
+}

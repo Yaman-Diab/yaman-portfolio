@@ -1,0 +1,122 @@
+---
+import '@/presentation/styles/base.css';
+import displayLatinFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2?url';
+import displayArabicFont from '@fontsource-variable/fustat/files/fustat-arabic-wght-normal.woff2?url';
+import bodyLatinFont from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url';
+import bodyArabicFont from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-400-normal.woff2?url';
+import { absoluteUrl, routes } from '@/app/routes';
+import { LOCALES, directionOf, otherLocale, type Locale } from '@/domain/entities/locale';
+import type { Profile } from '@/domain/entities/profile';
+import SiteFooter from '@/presentation/components/SiteFooter.astro';
+import SiteHeader from '@/presentation/components/SiteHeader.astro';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  /** Page title without the site name. Omit on the home page. */
+  title?: string;
+  description: string;
+  profile: Profile;
+  /** The address of this same page in a given language. */
+  pathFor: (locale: Locale) => string;
+}
+
+const { locale, title, description, profile, pathFor } = Astro.props;
+const t = useUi(locale);
+const dir = directionOf(locale);
+
+const siteName = `${profile.name}${t.comma}${profile.role}`;
+const pageTitle = title ? `${title} | ${profile.name}` : siteName;
+const canonical = absoluteUrl(pathFor(locale), Astro.site);
+const socialImage = absoluteUrl(routes.asset('og.png'), Astro.site);
+
+// The fonts needed for the first screen. The rest load on demand.
+const preloads = locale === 'ar' ? [displayArabicFont, bodyArabicFont] : [displayLatinFont, bodyLatinFont];
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.nameLatin,
+  alternateName: profile.nameArabic,
+  jobTitle: 'Flutter Developer',
+  url: absoluteUrl(routes.home('en'), Astro.site),
+  image: socialImage,
+  email: `mailto:${profile.contact.email}`,
+  address: { '@type': 'PostalAddress', addressLocality: 'Damascus', addressCountry: 'SY' },
+  knowsLanguage: ['ar', 'en'],
+  sameAs: [profile.contact.github, profile.contact.linkedin],
+};
+---
+
+<!doctype html>
+<html lang={locale} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={profile.nameLatin} />
+    <meta name="theme-color" content="#0c3a34" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="canonical" href={canonical} />
+    {LOCALES.map((code) => <link rel="alternate" hreflang={code} href={absoluteUrl(pathFor(code), Astro.site)} />)}
+    <link rel="alternate" hreflang="x-default" href={absoluteUrl(pathFor('en'), Astro.site)} />
+
+    <link rel="icon" href={routes.asset('favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={routes.asset('favicon.png')} type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href={routes.asset('apple-touch-icon.png')} />
+    <link rel="sitemap" href={routes.asset('sitemap-index.xml')} />
+
+    {preloads.map((href) => <link rel="preload" as="font" type="font/woff2" href={href} crossorigin />)}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={profile.nameLatin} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={siteName} />
+    <meta property="og:locale" content={locale === 'ar' ? 'ar_SY' : 'en_US'} />
+    <meta property="og:locale:alternate" content={otherLocale(locale) === 'ar' ? 'ar_SY' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(person)} />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      // A language switch asks for the page-turn transition (see base.css).
+      // The request is used once and always cleared, so it can never leak into a later navigation.
+      function takeTransitionType() {
+        try {
+          const type = sessionStorage.getItem('view-transition');
+          sessionStorage.removeItem('view-transition');
+          return type;
+        } catch {
+          return null; /* storage blocked: keep the default transition */
+        }
+      }
+      window.addEventListener('pagereveal', (event) => {
+        const type = takeTransitionType();
+        if (type && event.viewTransition) event.viewTransition.types.add(type);
+      });
+      window.addEventListener('pageshow', () => setTimeout(takeTransitionType, 0));
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.skip}</a>
+    <SiteHeader locale={locale} name={profile.name} alternateHref={pathFor(otherLocale(locale))} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter locale={locale} profile={profile} />
+    <script>
+      import '@/presentation/scripts/site';
+    </script>
+  </body>
+</html>

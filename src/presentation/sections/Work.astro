@@ -1,0 +1,172 @@
+---
+import { routes } from '@/app/routes';
+import type { Locale } from '@/domain/entities/locale';
+import type { Project } from '@/domain/entities/project';
+import StatusPill from '@/presentation/components/StatusPill.astro';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  projects: Project[];
+}
+
+const { locale, projects } = Astro.props;
+const t = useUi(locale);
+---
+
+<section class="section theme-paper-dim" id="work">
+  <div class="wrap">
+    <header class="work__head">
+      <h2 class="section__title">{t.work.title}</h2>
+      <p class="section__intro">{t.work.intro}</p>
+    </header>
+
+    <ul class="work__list" data-inview>
+      {
+        projects.map((project, index) => (
+          <li data-reveal style={`--i:${index}`}>
+            <a class="work-row" href={routes.project(locale, project.slug)} aria-label={`${project.name}. ${t.work.open}`}>
+              <span class="work-row__name" style={`view-transition-name: project-${project.slug}`}>
+                {project.name}
+              </span>
+              <span class="work-row__text">
+                <span class="work-row__tagline">{project.tagline}</span>
+                <span class="work-row__teaser">{project.teaser}</span>
+              </span>
+              <span class="work-row__meta">
+                <StatusPill status={project.status} label={project.statusLabel} />
+                <span class="work-row__year">{project.year}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .work__head {
+    display: grid;
+    gap: var(--space-4);
+    margin-block-end: var(--space-7);
+  }
+
+  .work__list {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .work__list li {
+    border-block-end: 1px solid var(--rule);
+  }
+
+  .work-row {
+    position: relative;
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-6) clamp(0rem, 1.5vw, 1.5rem);
+    text-decoration: none;
+    isolation: isolate;
+    transition: color var(--dur) var(--ease-out);
+  }
+
+  /* The green fill sweeps in from where reading starts. */
+  .work-row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--ghouta);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  [dir='rtl'] .work-row::before {
+    transform-origin: right center;
+  }
+
+  .work-row__name {
+    width: fit-content;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 650;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.03em;
+    transition: translate var(--dur) var(--ease-out);
+  }
+
+  [dir='rtl'] .work-row__name {
+    letter-spacing: 0;
+    font-size: calc(var(--text-3xl) * 0.9);
+  }
+
+  .work-row__text {
+    display: grid;
+    gap: var(--space-1);
+    align-content: center;
+  }
+
+  .work-row__tagline {
+    font-weight: 600;
+  }
+
+  .work-row__teaser {
+    color: var(--fg-muted);
+    transition: color var(--dur) var(--ease-out);
+  }
+
+  .work-row__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+
+  .work-row__year {
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-muted);
+    transition: color var(--dur) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .work-row:hover,
+    .work-row:focus-visible {
+      color: var(--jasmine);
+      --ok: var(--leaf);
+      --accent-warm: var(--apricot);
+    }
+
+    .work-row:hover::before,
+    .work-row:focus-visible::before {
+      transform: scaleX(1);
+    }
+
+    .work-row:hover .work-row__name,
+    .work-row:focus-visible .work-row__name {
+      translate: calc(var(--dir) * 0.75rem) 0;
+    }
+
+    .work-row:hover .work-row__teaser,
+    .work-row:hover .work-row__year,
+    .work-row:focus-visible .work-row__teaser,
+    .work-row:focus-visible .work-row__year {
+      color: var(--sage);
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .work-row {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 5fr) minmax(0, 3fr);
+      align-items: center;
+      column-gap: var(--space-6);
+      padding-block: var(--space-7);
+    }
+
+    .work-row__meta {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-2);
+    }
+  }
+</style>

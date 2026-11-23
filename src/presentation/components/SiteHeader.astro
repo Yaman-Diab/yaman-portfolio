@@ -1,0 +1,149 @@
+---
+import { routes } from '@/app/routes';
+import { otherLocale, type Locale } from '@/domain/entities/locale';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  name: string;
+  /** This same page in the other language. */
+  alternateHref: string;
+}
+
+const { locale, name, alternateHref } = Astro.props;
+const t = useUi(locale);
+const other = otherLocale(locale);
+
+const links = [
+  { id: 'work', label: t.nav.work },
+  { id: 'about', label: t.nav.about },
+  { id: 'experience', label: t.nav.experience },
+  { id: 'contact', label: t.nav.contact },
+];
+---
+
+<header class="site-header" data-site-header>
+  <div class="wrap site-header__inner">
+    <a class="site-header__mark" href={routes.home(locale)}>
+      <span class="nuqta" aria-hidden="true"></span>
+      {name}
+    </a>
+
+    <nav class="site-header__nav" aria-label={t.navLabel}>
+      {links.map((link) => <a href={routes.section(locale, link.id)}>{link.label}</a>)}
+    </nav>
+
+    <a
+      class="language-switch"
+      href={alternateHref}
+      hreflang={other}
+      lang={other}
+      aria-label={t.switchLanguageLabel}
+      data-language-switch
+    >
+      {t.switchLanguage}
+    </a>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 50;
+    background: var(--ghouta);
+    color: var(--jasmine);
+    transition:
+      background-color var(--dur) ease,
+      box-shadow var(--dur) ease;
+  }
+
+  .site-header.is-scrolled {
+    background: color-mix(in srgb, var(--ghouta-deep) 92%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 0 var(--line-green);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    min-height: var(--header-height);
+  }
+
+  .site-header__mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    margin-inline-end: auto;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .site-header__mark .nuqta {
+    color: var(--apricot);
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .site-header__mark:hover .nuqta {
+    transform: rotate(225deg);
+  }
+
+  .site-header__nav {
+    display: none;
+    gap: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  .site-header__nav a {
+    padding-block: 0.4rem;
+    color: var(--sage);
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) no-repeat;
+    background-size: 0 1.5px;
+    background-position: 0 100%;
+    transition:
+      color var(--dur-fast) ease,
+      background-size var(--dur) var(--ease-out);
+  }
+
+  [dir='rtl'] .site-header__nav a {
+    background-position: 100% 100%;
+  }
+
+  .site-header__nav a:hover {
+    color: var(--jasmine);
+    background-size: 100% 1.5px;
+  }
+
+  .language-switch {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.3rem 0.9rem;
+    border: 1.5px solid var(--line-green);
+    border-radius: var(--radius);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease,
+      color var(--dur-fast) ease;
+  }
+
+  .language-switch:hover {
+    border-color: var(--apricot);
+    background: var(--apricot);
+    color: var(--ink);
+  }
+
+  @media (min-width: 48rem) {
+    .site-header__nav {
+      display: flex;
+    }
+  }
+</style>

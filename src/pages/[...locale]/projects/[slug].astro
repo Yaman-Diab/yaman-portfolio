@@ -1,0 +1,34 @@
+---
+import { portfolioRepository } from '@/app/container';
+import { localeParams, routes } from '@/app/routes';
+import type { Locale } from '@/domain/entities/locale';
+import { PROJECT_SLUGS, type ProjectSlug } from '@/domain/entities/project';
+import { getCaseStudy } from '@/domain/usecases/get-case-study';
+import CaseStudy from '@/presentation/features/case-study/CaseStudy.astro';
+import BaseLayout from '@/presentation/layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  return localeParams().flatMap(({ params, props }) =>
+    PROJECT_SLUGS.map((slug) => ({ params: { ...params, slug }, props: { ...props, slug } })),
+  );
+}
+
+interface Props {
+  locale: Locale;
+  slug: ProjectSlug;
+}
+
+const { locale, slug } = Astro.props;
+const profile = portfolioRepository.getProfile(locale);
+const { project, next } = getCaseStudy(portfolioRepository, locale, slug);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${project.name}: ${project.tagline}`}
+  description={project.summary}
+  profile={profile}
+  pathFor={(code) => routes.project(code, slug)}
+>
+  <CaseStudy locale={locale} project={project} next={next} />
+</BaseLayout>

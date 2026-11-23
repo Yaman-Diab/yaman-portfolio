@@ -1,0 +1,250 @@
+---
+import { routes } from '@/app/routes';
+import type { Career } from '@/domain/entities/career';
+import type { Locale } from '@/domain/entities/locale';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  career: Career;
+}
+
+const { locale, career } = Astro.props;
+const t = useUi(locale);
+const { entry, education, milestones } = career;
+---
+
+<section class="section theme-paper" id="experience">
+  <div class="wrap experience">
+    <div class="experience__main">
+      <h2 class="section__title">{career.title}</h2>
+
+      <article class="role">
+        <h3>{entry.title}</h3>
+        <p class="role__meta">{entry.mode}{t.comma}{entry.duration}</p>
+        <p>{entry.summary}</p>
+        <ul class="role__highlights">
+          {
+            entry.highlights.map((highlight) => (
+              <li>
+                <span class="nuqta" aria-hidden="true" />
+                <span>{highlight}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </article>
+
+      <article class="education">
+        <h3>{t.career.educationTitle}</h3>
+        <p class="education__school">{education.school}</p>
+        <p>{education.degree}</p>
+        <p class="education__note">{education.note}</p>
+      </article>
+    </div>
+
+    <div class="timeline" data-inview>
+      <h3 class="timeline__title">{t.career.timelineTitle}</h3>
+      <ol class="timeline__list">
+        {
+          milestones.map((milestone, index) => (
+            <li class="timeline__item" data-reveal style={`--i:${index}`}>
+              <span class="timeline__year">{milestone.year}</span>
+              <span class="nuqta timeline__node" aria-hidden="true" />
+              <div class="timeline__body">
+                <h4>{milestone.title}</h4>
+                <p>{milestone.body}</p>
+                {milestone.projectSlug && (
+                  <a class="link" href={routes.project(locale, milestone.projectSlug)}>
+                    {t.career.caseStudy}
+                    <span class="visually-hidden">: {milestone.title}</span>
+                  </a>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .experience {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .experience__main {
+    display: grid;
+    gap: var(--space-7);
+    align-content: start;
+  }
+
+  .role,
+  .education {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 34rem;
+  }
+
+  .role h3 {
+    font-size: var(--text-xl);
+  }
+
+  .role__meta {
+    color: var(--accent-warm);
+    font-weight: 600;
+  }
+
+  .role__highlights {
+    display: grid;
+    gap: var(--space-2);
+    margin-block-start: var(--space-2);
+    color: var(--fg-muted);
+  }
+
+  .role__highlights li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75em;
+  }
+
+  .role__highlights .nuqta {
+    font-size: 0.75em;
+    color: var(--accent-warm);
+    translate: 0 -0.1em;
+  }
+
+  .education {
+    padding-block-start: var(--space-6);
+    border-block-start: 1px solid var(--rule);
+    gap: var(--space-1);
+  }
+
+  .education h3,
+  .timeline__title {
+    margin-block-end: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--fg-muted);
+  }
+
+  .education__school {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .education__note {
+    color: var(--fg-muted);
+  }
+
+  /* ---------- Timeline ---------- */
+
+  .timeline__list {
+    --node: 0.7rem;
+    --year: 3.25rem;
+    position: relative;
+    display: grid;
+    margin-block-start: var(--space-5);
+  }
+
+  /* The line the milestones hang on. */
+  .timeline__list::before {
+    content: '';
+    position: absolute;
+    inset-block: 0.6rem 0.6rem;
+    inset-inline-start: calc(var(--year) + var(--space-4) + var(--node) / 2 - 1px);
+    width: 2px;
+    background: var(--rule);
+    transform-origin: top center;
+  }
+
+  .timeline__item {
+    display: grid;
+    grid-template-columns: var(--year) var(--node) minmax(0, 1fr);
+    column-gap: var(--space-4);
+    align-items: start;
+    padding-block-end: var(--space-6);
+  }
+
+  .timeline__item:last-child {
+    padding-block-end: 0;
+  }
+
+  .timeline__year {
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+    line-height: calc(var(--text-lg) * var(--leading-snug));
+  }
+
+  .timeline__node {
+    position: relative;
+    z-index: 1;
+    width: var(--node);
+    height: var(--node);
+    background: var(--accent-warm);
+    outline: 4px solid var(--bg);
+    /* Sits beside the first line of the milestone, however long the text runs. */
+    align-self: start;
+    margin-block-start: 0.5rem;
+  }
+
+  .timeline__item:first-child .timeline__node {
+    background: var(--ghouta);
+  }
+
+  .timeline__body {
+    display: grid;
+    gap: var(--space-1);
+    justify-items: start;
+  }
+
+  .timeline__body h4 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+  }
+
+  .timeline__body p {
+    color: var(--fg-muted);
+  }
+
+  .timeline__body .link {
+    font-size: var(--text-sm);
+  }
+
+  /* The line grows as the timeline scrolls into view, where the browser can do it natively. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .timeline__list::before {
+        animation: grow-line linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 55%;
+      }
+    }
+  }
+
+  @keyframes grow-line {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .experience {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      column-gap: var(--space-9);
+    }
+
+    .timeline {
+      padding-block-start: calc(var(--text-2xl) * 1.05 + var(--space-7));
+    }
+  }
+</style>

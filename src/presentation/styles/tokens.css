@@ -1,0 +1,132 @@
+/*
+ * Design tokens. Every colour, size and duration on the site comes from here.
+ *
+ * Palette: Damascus is "the city of jasmine", ringed by the Ghouta orchards
+ * and known for its apricots. Those three give the paper, the green and
+ * the accent.
+ *
+ * Layout: start-aligned on a 12-column grid, mirrored for Arabic through
+ * logical properties. Sections alternate between green and paper blocks.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Palette */
+  --ghouta: #0c3a34;
+  --ghouta-deep: #072824;
+  --ghouta-soft: #14493f;
+  --jasmine: #f6f7f1;
+  --jasmine-dim: #e9ede4;
+  --white: #ffffff;
+  --ink: #11211e;
+  --ink-soft: #4c5f59;
+  --sage: #a9c7bd;
+  --apricot: #ffb24d;
+  --apricot-deep: #9a5200;
+  --leaf: #6fd3a8;
+  --leaf-deep: #0f5a4e;
+  --pomegranate: #ff8a8e;
+  --pomegranate-deep: #b8323a;
+  --line: #c9d2c6;
+  --line-green: #2f6658;
+
+  /* Type */
+  --font-display: 'Bricolage Grotesque', 'Fustat', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
+  --font-body: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --text-lg: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+  --text-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.875rem);
+  --text-2xl: clamp(1.875rem, 1.4rem + 2.2vw, 3.25rem);
+  --text-3xl: clamp(2.5rem, 1.6rem + 4.5vw, 5rem);
+  --text-hero: clamp(3.25rem, 0.6rem + 12.4vw, 11.5rem);
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.25;
+  --leading-body: 1.6;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --section-pad: clamp(4rem, 2.5rem + 6.5vw, 8.5rem);
+  --gutter: clamp(1.25rem, 0.4rem + 3.6vw, 3.5rem);
+  --content: 76rem;
+  --header-height: 4rem;
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 18px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 180ms;
+  --dur: 420ms;
+  --dur-slow: 900ms;
+
+  /* 1 in left-to-right pages, -1 in right-to-left. Multiply transforms by it. */
+  --dir: 1;
+}
+
+[dir='rtl'] {
+  --dir: -1;
+  --leading-tight: 1.3;
+  --leading-snug: 1.5;
+  --leading-body: 1.85;
+}
+
+/* Section themes. Components read these, never the palette directly. */
+.theme-paper {
+  --bg: var(--jasmine);
+  --fg: var(--ink);
+  --fg-muted: var(--ink-soft);
+  --rule: var(--line);
+  --accent: var(--leaf-deep);
+  --accent-warm: var(--apricot-deep);
+  --surface: var(--white);
+  --danger: var(--pomegranate-deep);
+  --ok: var(--leaf-deep);
+}
+
+.theme-paper-dim {
+  --bg: var(--jasmine-dim);
+  --fg: var(--ink);
+  --fg-muted: var(--ink-soft);
+  --rule: var(--line);
+  --accent: var(--leaf-deep);
+  --accent-warm: var(--apricot-deep);
+  --surface: var(--jasmine);
+  --danger: var(--pomegranate-deep);
+  --ok: var(--leaf-deep);
+}
+
+.theme-green {
+  --bg: var(--ghouta);
+  --fg: var(--jasmine);
+  --fg-muted: var(--sage);
+  --rule: var(--line-green);
+  --accent: var(--apricot);
+  --accent-warm: var(--apricot);
+  --surface: var(--ghouta-soft);
+  --danger: var(--pomegranate);
+  --ok: var(--leaf);
+}
+
+.theme-paper,
+.theme-paper-dim,
+.theme-green {
+  background: var(--bg);
+  color: var(--fg);
+}
