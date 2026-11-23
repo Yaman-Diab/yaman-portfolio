@@ -1,0 +1,108 @@
+---
+/**
+ * A soft blue light that follows the mouse pointer.
+ *
+ * Only on devices with a real mouse, and never when the visitor has asked
+ * for reduced motion. The light is one pre-painted circle moved with a
+ * transform, so following the pointer costs no repaint.
+ */
+---
+
+<div class="cursor-glow" data-cursor-glow aria-hidden="true"></div>
+
+<script>
+  const glow = document.querySelector<HTMLElement>('[data-cursor-glow]');
+  const allowed = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+
+  if (glow) {
+    // Where the light is, and where the pointer is. The light eases toward the pointer.
+    let x = 0;
+    let y = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let frame = 0;
+    let visible = false;
+
+    const place = () => {
+      glow.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    };
+
+    const follow = () => {
+      x += (targetX - x) * 0.22;
+      y += (targetY - y) * 0.22;
+      place();
+      const settled = Math.abs(targetX - x) < 0.5 && Math.abs(targetY - y) < 0.5;
+      frame = settled ? 0 : requestAnimationFrame(follow);
+    };
+
+    const hide = () => {
+      visible = false;
+      glow.classList.remove('is-visible');
+    };
+
+    window.addEventListener(
+      'pointermove',
+      (event) => {
+        if (event.pointerType !== 'mouse' || !allowed.matches) {
+          if (visible) hide();
+          return;
+        }
+        targetX = event.clientX;
+        targetY = event.clientY;
+        if (!visible) {
+          // Appear where the pointer is instead of sliding in from a corner.
+          x = targetX;
+          y = targetY;
+          place();
+          visible = true;
+          glow.classList.add('is-visible');
+        }
+        if (!frame) frame = requestAnimationFrame(follow);
+      },
+      { passive: true },
+    );
+
+    // The pointer left the window, or the window lost focus.
+    document.documentElement.addEventListener('mouseleave', hide);
+    window.addEventListener('blur', hide);
+    allowed.addEventListener('change', () => {
+      if (!allowed.matches) hide();
+    });
+  }
+</script>
+
+<style>
+  .cursor-glow {
+    --size: 37.5rem;
+    position: fixed;
+    inset-block-start: 0;
+    left: 0;
+    z-index: 40; /* under the header, over the page */
+    width: var(--size);
+    height: var(--size);
+    margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+    border-radius: 50%;
+    /* Blue at low strength: a faint tint on paper, a lift of light on navy. */
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--blue) 16%, transparent),
+      color-mix(in srgb, var(--blue) 6%, transparent) 55%,
+      transparent
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--dur) ease;
+    will-change: transform;
+  }
+
+  .cursor-glow.is-visible {
+    opacity: 1;
+  }
+
+  /* Touch screens and reduced motion never show it, even if the script misjudges. */
+  @media not ((hover: hover) and (pointer: fine)), (prefers-reduced-motion: reduce) {
+    .cursor-glow {
+      display: none;
+    }
+  }
+</style>

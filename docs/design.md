@@ -95,6 +95,7 @@ Experience and achievements stay separate: the timeline shows the work in order,
 | Diagrams | Steps arrive in order, then packets travel the chain | Shows direction of flow |
 | Timeline | The line grows as it scrolls into view | Shows sequence |
 | Buttons | "Copy" becomes "Copied", status dots pulse only when live | Confirms an action or a state |
+| Cursor light | A soft blue light trails the mouse pointer. Desktop mice only, off with reduced motion | Makes the page feel lit from where you look, strongest on the navy band |
 
 Only `transform`, `opacity`, `clip-path` and `translate` are animated. With reduced motion turned on, every animation and page transition is switched off and all content is visible at once.
 

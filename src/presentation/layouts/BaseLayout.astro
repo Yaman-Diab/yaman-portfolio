@@ -7,6 +7,7 @@ import bodyArabicFont from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans
 import { absoluteUrl, routes } from '@/app/routes';
 import { LOCALES, directionOf, otherLocale, type Locale } from '@/domain/entities/locale';
 import type { Profile } from '@/domain/entities/profile';
+import CursorGlow from '@/presentation/components/CursorGlow.astro';
 import SiteFooter from '@/presentation/components/SiteFooter.astro';
 import SiteHeader from '@/presentation/components/SiteHeader.astro';
 import { useUi } from '@/presentation/i18n/ui';
@@ -115,6 +116,7 @@ const person = {
       <slot />
     </main>
     <SiteFooter locale={locale} profile={profile} />
+    <CursorGlow />
     <script>
       import '@/presentation/scripts/site';
     </script>
