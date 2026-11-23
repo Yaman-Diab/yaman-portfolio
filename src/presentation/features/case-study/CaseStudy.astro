@@ -3,8 +3,10 @@ import { routes } from '@/app/routes';
 import type { Locale } from '@/domain/entities/locale';
 import type { Project } from '@/domain/entities/project';
 import StatusPill from '@/presentation/components/StatusPill.astro';
+import ToolList from '@/presentation/components/ToolList.astro';
 import { useUi } from '@/presentation/i18n/ui';
 import FlowDiagram from './FlowDiagram.astro';
+import ScreenGallery from './ScreenGallery.astro';
 import SyncQueueDemo from './SyncQueueDemo.astro';
 import VerificationDemo from './VerificationDemo.astro';
 
@@ -20,7 +22,7 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
 ---
 
 <article class="case">
-  <header class="case__hero theme-green">
+  <header class="case__hero theme-mist">
     <div class="wrap">
       <a class="case__back" href={routes.section(locale, 'work')}>
         <span class="case__back-arrow" aria-hidden="true"></span>
@@ -68,6 +70,8 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
     </div>
   </header>
 
+  <ScreenGallery screens={project.screens} appName={project.name} label={t.caseStudy.screens} />
+
   <div class="theme-paper">
     <div class="wrap case__body">
       <section class="case__block">
@@ -93,7 +97,7 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
     </div>
   </div>
 
-  <div class="theme-paper-dim">
+  <div class="theme-tint">
     <div class="wrap case__challenges">
       <h2 class="case__challenges-title">{t.caseStudy.challenges}</h2>
       {
@@ -118,9 +122,7 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
         <h2>{t.caseStudy.architecture}</h2>
         <div class="case__prose">
           <p>{project.architecture}</p>
-          <ul class="case__stack" dir="ltr" lang="en">
-            {project.stack.map((tool) => <li>{tool}</li>)}
-          </ul>
+          <ToolList tools={project.stack} label={t.expertise.toolsLabel} />
         </div>
       </section>
 
@@ -140,7 +142,7 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
     </div>
   </div>
 
-  <a class="case__next theme-paper-dim" href={routes.project(locale, next.slug)}>
+  <a class="case__next theme-tint" href={routes.project(locale, next.slug)}>
     <span class="wrap case__next-inner">
       <span class="case__next-label">{t.caseStudy.next}</span>
       <span class="case__next-name">{next.name}</span>
@@ -205,7 +207,7 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
   .case__alt-name {
     font-size: 0.36em;
     font-weight: 600;
-    color: var(--apricot);
+    color: var(--accent);
     letter-spacing: 0;
   }
 
@@ -293,33 +295,13 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
 
   .case__list .nuqta {
     font-size: 0.8em;
-    color: var(--accent-warm);
+    color: var(--accent);
     translate: 0 -0.1em;
   }
 
   .case__list--outcome {
     font-size: var(--text-lg);
     line-height: var(--leading-snug);
-  }
-
-  .case__stack {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-block-start: var(--space-3);
-  }
-
-  [dir='rtl'] .case__stack {
-    justify-content: flex-end;
-  }
-
-  .case__stack li {
-    padding: 0.3rem 0.75rem;
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    font-size: var(--text-sm);
-    line-height: 1.4;
   }
 
   /* ---------- Hard parts ---------- */
@@ -392,15 +374,16 @@ const altLang = locale === 'ar' ? 'en' : 'ar';
 
   .case__next:hover,
   .case__next:focus-visible {
-    background: var(--ghouta);
-    color: var(--jasmine);
+    background: var(--navy);
+    color: var(--paper);
+    --focus: var(--blue-light);
   }
 
   .case__next:hover .case__next-label,
   .case__next:hover .case__next-tagline,
   .case__next:focus-visible .case__next-label,
   .case__next:focus-visible .case__next-tagline {
-    color: var(--sage);
+    color: var(--navy-text);
   }
 
   .case__next:hover .case__next-name,

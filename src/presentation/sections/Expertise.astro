@@ -1,6 +1,7 @@
 ---
 import type { ExpertiseGroup } from '@/domain/entities/career';
 import type { Locale } from '@/domain/entities/locale';
+import ToolList from '@/presentation/components/ToolList.astro';
 import { useUi } from '@/presentation/i18n/ui';
 
 interface Props {
@@ -12,7 +13,7 @@ const { locale, groups } = Astro.props;
 const t = useUi(locale);
 ---
 
-<section class="section theme-green" id="expertise">
+<section class="section theme-mist" id="expertise">
   <div class="wrap">
     <header class="expertise__head">
       <h2 class="section__title">{t.expertise.title}</h2>
@@ -26,10 +27,7 @@ const t = useUi(locale);
             <h3>{group.title}</h3>
             <div class="expertise__text">
               <p>{group.body}</p>
-              <p class="expertise__tools" dir="ltr" lang="en">
-                <span class="visually-hidden">{t.expertise.toolsLabel}: </span>
-                {group.tools.join(', ')}
-              </p>
+              <ToolList tools={group.tools} label={t.expertise.toolsLabel} />
             </div>
           </li>
         ))
@@ -65,18 +63,6 @@ const t = useUi(locale);
     display: grid;
     gap: var(--space-3);
     max-width: 44rem;
-  }
-
-  /* Tool names are Latin in both languages, so they keep their own direction. */
-  .expertise__tools {
-    color: var(--fg-muted);
-    font-size: var(--text-sm);
-    text-align: start;
-    unicode-bidi: plaintext;
-  }
-
-  [dir='rtl'] .expertise__tools {
-    text-align: end;
   }
 
   @media (min-width: 56rem) {

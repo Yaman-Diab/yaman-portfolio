@@ -1,35 +1,46 @@
 /*
  * Design tokens. Every colour, size and duration on the site comes from here.
  *
- * Palette: Damascus is "the city of jasmine", ringed by the Ghouta orchards
- * and known for its apricots. Those three give the paper, the green and
- * the accent.
+ * Palette: four colours chosen by Yaman, used in roughly the proportions of
+ * the swatch they came from: mostly paper, then mist, then blue, with navy
+ * as the smallest and strongest band.
+ *
+ *   #F9F7F7 paper   #DBE2EF mist   #3F72AF blue   #112D4E navy
+ *
+ * Every other colour below is a tint or shade of those four, plus two
+ * semantic colours for "live" and "offline / rejected" states.
  *
  * Layout: start-aligned on a 12-column grid, mirrored for Arabic through
- * logical properties. Sections alternate between green and paper blocks.
+ * logical properties.
  */
 
 :root {
   color-scheme: light;
 
   /* Palette */
-  --ghouta: #0c3a34;
-  --ghouta-deep: #072824;
-  --ghouta-soft: #14493f;
-  --jasmine: #f6f7f1;
-  --jasmine-dim: #e9ede4;
+  --paper: #f9f7f7;
+  --mist: #dbe2ef;
+  --blue: #3f72af;
+  --navy: #112d4e;
+
+  /* Tints and shades of the palette */
   --white: #ffffff;
-  --ink: #11211e;
-  --ink-soft: #4c5f59;
-  --sage: #a9c7bd;
-  --apricot: #ffb24d;
-  --apricot-deep: #9a5200;
-  --leaf: #6fd3a8;
-  --leaf-deep: #0f5a4e;
-  --pomegranate: #ff8a8e;
-  --pomegranate-deep: #b8323a;
-  --line: #c9d2c6;
-  --line-green: #2f6658;
+  --paper-tint: #ecf0f6;
+  --blue-deep: #2f5c93;
+  --blue-light: #8fb3e3;
+  --navy-deep: #0b2140;
+  --navy-soft: #1b3a61;
+  --ink-soft: #4a5c76;
+  --navy-text: #b9c8dd;
+  --line: #d2dae6;
+  --line-strong: #b9c6d8;
+  --line-dark: #2e4c74;
+
+  /* Semantic states */
+  --ok-on-light: #17704a;
+  --ok-on-dark: #6fd3a8;
+  --danger-on-light: #b3323c;
+  --danger-on-dark: #ff9196;
 
   /* Type */
   --font-display: 'Bricolage Grotesque', 'Fustat', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
@@ -66,7 +77,8 @@
   /* Shape */
   --radius-sm: 6px;
   --radius: 10px;
-  --radius-lg: 18px;
+  --radius-lg: 22px;
+  --shadow-device: 0 30px 60px -30px color-mix(in srgb, var(--navy) 55%, transparent);
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -87,46 +99,70 @@
   --leading-body: 1.85;
 }
 
-/* Section themes. Components read these, never the palette directly. */
-.theme-paper {
-  --bg: var(--jasmine);
-  --fg: var(--ink);
+/*
+ * Section themes. Components read these tokens, never the palette directly,
+ * so any block can sit on any theme and stay readable.
+ */
+.theme-paper,
+.theme-tint,
+.theme-mist {
+  --fg: var(--navy);
   --fg-muted: var(--ink-soft);
   --rule: var(--line);
-  --accent: var(--leaf-deep);
-  --accent-warm: var(--apricot-deep);
+  --accent: var(--blue);
+  --accent-strong: var(--blue-deep);
   --surface: var(--white);
-  --danger: var(--pomegranate-deep);
-  --ok: var(--leaf-deep);
+  --surface-alt: var(--paper-tint);
+  --ok: var(--ok-on-light);
+  --danger: var(--danger-on-light);
+  --button-bg: var(--blue);
+  --button-fg: var(--white);
+  --button-hover: var(--blue-deep);
+  --focus: var(--blue);
+  --device: var(--navy);
 }
 
-.theme-paper-dim {
-  --bg: var(--jasmine-dim);
-  --fg: var(--ink);
-  --fg-muted: var(--ink-soft);
-  --rule: var(--line);
-  --accent: var(--leaf-deep);
-  --accent-warm: var(--apricot-deep);
-  --surface: var(--jasmine);
-  --danger: var(--pomegranate-deep);
-  --ok: var(--leaf-deep);
+.theme-paper {
+  --bg: var(--paper);
 }
 
-.theme-green {
-  --bg: var(--ghouta);
-  --fg: var(--jasmine);
-  --fg-muted: var(--sage);
-  --rule: var(--line-green);
-  --accent: var(--apricot);
-  --accent-warm: var(--apricot);
-  --surface: var(--ghouta-soft);
-  --danger: var(--pomegranate);
-  --ok: var(--leaf);
+/* Small accent text needs the deeper blue on the two tinted grounds. */
+.theme-tint {
+  --bg: var(--paper-tint);
+  --accent: var(--blue-deep);
+  --surface-alt: var(--paper);
+}
+
+.theme-mist {
+  --bg: var(--mist);
+  --accent: var(--blue-deep);
+  --rule: var(--line-strong);
+  --surface: var(--paper);
+  --surface-alt: var(--paper);
+}
+
+.theme-dark {
+  --bg: var(--navy);
+  --fg: var(--paper);
+  --fg-muted: var(--navy-text);
+  --rule: var(--line-dark);
+  --accent: var(--blue-light);
+  --accent-strong: var(--blue-light);
+  --surface: var(--navy-soft);
+  --surface-alt: var(--navy-soft);
+  --ok: var(--ok-on-dark);
+  --danger: var(--danger-on-dark);
+  --button-bg: var(--mist);
+  --button-fg: var(--navy);
+  --button-hover: var(--white);
+  --focus: var(--blue-light);
+  --device: var(--navy-deep);
 }
 
 .theme-paper,
-.theme-paper-dim,
-.theme-green {
+.theme-tint,
+.theme-mist,
+.theme-dark {
   background: var(--bg);
   color: var(--fg);
 }

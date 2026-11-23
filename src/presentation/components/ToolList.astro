@@ -1,0 +1,35 @@
+---
+interface Props {
+  tools: string[];
+  /** Read out before the list, for example "Tools". */
+  label: string;
+}
+
+const { tools, label } = Astro.props;
+---
+
+<!-- Tool names are Latin in both languages, so they keep their own direction. -->
+<ul class="tools" dir="ltr" lang="en" aria-label={label}>
+  {tools.map((tool) => <li>{tool}</li>)}
+</ul>
+
+<style>
+  .tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  [dir='rtl'] .tools {
+    justify-content: flex-end;
+  }
+
+  .tools li {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+</style>

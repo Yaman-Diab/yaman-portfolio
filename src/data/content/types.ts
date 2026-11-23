@@ -1,10 +1,15 @@
 import type { Career, Recognition, Writing } from '@/domain/entities/career';
 import type { Profile } from '@/domain/entities/profile';
-import type { Project, ProjectLink, ProjectSlug, ProjectStatus } from '@/domain/entities/project';
+import type { Project, ProjectLink, ProjectSlug, ProjectStatus, Screen } from '@/domain/entities/project';
 import type { ExpertiseId } from './facts';
 
-/** The translated part of a project. Facts are merged in by the mapper. */
-export type ProjectText = Omit<Project, 'slug' | 'year' | 'status' | 'statusLabel' | 'stack' | 'links'>;
+/** The words for one screen. The picture is found by file name (see screens.ts). */
+export type ScreenText = Omit<Screen, 'image'>;
+
+/** The translated part of a project. Facts and screenshots are merged in by the repository. */
+export type ProjectText = Omit<Project, 'slug' | 'year' | 'status' | 'statusLabel' | 'stack' | 'links' | 'screens'> & {
+  screens: ScreenText[];
+};
 
 /** Everything one language file has to provide. */
 export interface LocalizedContent {

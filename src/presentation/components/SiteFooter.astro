@@ -13,7 +13,7 @@ const t = useUi(locale);
 const { contact } = profile;
 ---
 
-<footer class="contact theme-green" id="contact">
+<footer class="contact theme-dark" id="contact">
   <div class="wrap">
     <h2 class="contact__title">{profile.contactTitle}</h2>
     <p class="contact__body">{profile.contactBody}</p>
@@ -90,7 +90,7 @@ const { contact } = profile;
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.1;
-    color: var(--apricot);
+    color: var(--accent);
     text-decoration-line: underline;
     text-decoration-thickness: 2px;
     text-decoration-color: transparent;
@@ -104,8 +104,8 @@ const { contact } = profile;
   }
 
   .contact__copy.is-copied {
-    border-color: var(--leaf);
-    color: var(--leaf);
+    border-color: var(--ok);
+    color: var(--ok);
   }
 
   .contact__details {
@@ -136,7 +136,7 @@ const { contact } = profile;
   }
 
   .contact__details a:hover {
-    text-decoration-color: var(--apricot);
+    text-decoration-color: var(--accent);
   }
 
   .contact__foot {

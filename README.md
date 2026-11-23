@@ -28,7 +28,7 @@ src/
 │   ├── repositories/       PortfolioRepository (the contract)
 │   └── usecases/           getCaseStudy: one project plus the next one
 ├── data/                   Where the content lives.
-│   ├── content/            facts.ts (links, years, stacks), en.ts, ar.ts
+│   ├── content/            facts.ts (links, years, stacks), en.ts, ar.ts, screens.ts
 │   ├── validation/         Schema checks, and a check that both languages match
 │   └── repositories/       StaticPortfolioRepository (implements the contract)
 ├── app/                    Wiring.
@@ -37,9 +37,9 @@ src/
 ├── presentation/           Everything visual. Reads domain types only.
 │   ├── styles/             tokens.css, base.css, fonts.css
 │   ├── layouts/            BaseLayout.astro (head, SEO, header, footer)
-│   ├── components/         SiteHeader, SiteFooter, StatusPill
+│   ├── components/         SiteHeader, SiteFooter, StatusPill, PhoneFrame, ToolList
 │   ├── sections/           Hero, About, Work, Expertise, Experience, Recognition, Writing
-│   ├── features/case-study CaseStudy, FlowDiagram, SyncQueueDemo, VerificationDemo
+│   ├── features/case-study CaseStudy, ScreenGallery, FlowDiagram, SyncQueueDemo, VerificationDemo
 │   ├── scripts/            site.ts (scroll reveal, copy button, header, language switch)
 │   └── i18n/               ui.ts (button and heading labels in both languages)
 └── pages/                  Routes. Each one asks the container for data and passes it down.
@@ -84,6 +84,8 @@ Everything you would normally change is in `src/data/content/`.
 | Any Arabic text | `ar.ts` |
 | Button and heading labels | `src/presentation/i18n/ui.ts` |
 | The portrait | Replace `src/assets/yaman-diab.webp` (square, at least 900px) |
+| Phone screenshots | Add `1.png`, `2.png`, `3.png` to `src/assets/screens/<project>/` (see the README there) |
+| The names of the three screens | `screens` under each project in `en.ts` and `ar.ts` |
 | Colours, type sizes, spacing | `src/presentation/styles/tokens.css` |
 | The social preview image | `scripts/generate-og.mjs`, then `npm run og` |
 
@@ -115,6 +117,6 @@ Set the domain under **Settings → Pages → Custom domain** and add the DNS re
 
 ## Known limits
 
-- Case studies use diagrams and two small interactive models instead of screenshots. Real screenshots can be added later.
+- Each project has three phone frames. Until screenshots are added, they show the app and screen names.
 - Page transitions need a browser with cross-document view transitions (Chrome, Edge, Safari 18.2+). Other browsers navigate normally.
 - `robots.txt` is not served, because a project site lives under `/yaman-portfolio/` and crawlers only read that file at the domain root. Add one if you move to a custom domain.

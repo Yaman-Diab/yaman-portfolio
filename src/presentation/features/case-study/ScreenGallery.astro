@@ -1,0 +1,74 @@
+---
+import type { Screen } from '@/domain/entities/project';
+import PhoneFrame from '@/presentation/components/PhoneFrame.astro';
+
+interface Props {
+  screens: Screen[];
+  appName: string;
+  label: string;
+}
+
+const { screens, appName, label } = Astro.props;
+---
+
+<section class="screens theme-paper" aria-label={label}>
+  <div class="wrap">
+    <ul class="screens__track" data-inview>
+      {
+        screens.map((screen, index) => (
+          <li class="screens__item" data-reveal style={`--i:${index}`}>
+            <PhoneFrame screen={screen} appName={appName} sizes="(min-width: 60rem) 16rem, 62vw" caption />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* The phones stand across the edge between the mist hero and the paper page. */
+  .screens {
+    background: linear-gradient(to bottom, var(--mist) 0 48%, var(--bg) 48% 100%);
+  }
+
+  .screens__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(62vw, 15rem);
+    gap: var(--space-5);
+    margin-inline: calc(-1 * var(--gutter));
+    padding: var(--space-2) var(--gutter) var(--space-6);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .screens__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .screens__item {
+    scroll-snap-align: center;
+  }
+
+  @media (min-width: 48rem) {
+    .screens__track {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-columns: auto;
+      align-items: end;
+      gap: clamp(1.5rem, 4vw, 3.5rem);
+      max-width: 54rem;
+      margin-inline: auto;
+      padding: 0 0 var(--space-7);
+      overflow: visible;
+    }
+
+    /* The middle screen stands a little taller, like a hand of cards. */
+    .screens__item:nth-child(2) {
+      margin-block-end: clamp(1.5rem, 4vw, 3rem);
+    }
+  }
+</style>

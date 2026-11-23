@@ -16,8 +16,8 @@ html {
 
 body {
   margin: 0;
-  background: var(--ghouta);
-  color: var(--ink);
+  background: var(--paper);
+  color: var(--navy);
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-body);
@@ -75,14 +75,14 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--accent-warm, var(--apricot));
+  outline: 3px solid var(--focus, var(--blue));
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 ::selection {
-  background: var(--apricot);
-  color: var(--ink);
+  background: var(--mist);
+  color: var(--navy);
 }
 
 /* ---------- Layout primitives ---------- */
@@ -146,8 +146,8 @@ button {
   z-index: 100;
   padding: 0.6rem 1rem;
   border-radius: var(--radius-sm);
-  background: var(--apricot);
-  color: var(--ink);
+  background: var(--blue);
+  color: var(--white);
   font-weight: 600;
   text-decoration: none;
   transform: translateY(-200%);
@@ -196,12 +196,12 @@ button {
 }
 
 .button--primary {
-  background: var(--apricot);
-  color: var(--ink);
+  background: var(--button-bg);
+  color: var(--button-fg);
 }
 
 .button--primary:hover {
-  background: #ffc373;
+  background: var(--button-hover);
 }
 
 .button--ghost {
@@ -247,7 +247,7 @@ button {
 }
 
 ::view-transition {
-  background: var(--ghouta-deep);
+  background: var(--navy-deep);
 }
 
 ::view-transition-old(root),

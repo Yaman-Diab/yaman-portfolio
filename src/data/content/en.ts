@@ -59,6 +59,11 @@ export const en: LocalizedContent = {
       teaser: 'Encrypted offline lessons and an answer queue that never counts twice',
       summary:
         'One learning engine for three audiences: kids, general English from Pre-A1 to B2, and a school curriculum. Arabic-first, built for a client against a .NET API owned by a separate backend team.',
+      screens: [
+        { title: 'Home map', alt: 'Engleazia home screen with the map of lessons' },
+        { title: 'Lesson', alt: 'A lesson screen in Engleazia' },
+        { title: 'Offline downloads', alt: 'Engleazia screen for lessons saved offline' },
+      ],
       role: 'Sole mobile developer. Author of the product requirements and the backend guide.',
       platforms: 'Android and iOS',
       problem: [
@@ -123,6 +128,11 @@ export const en: LocalizedContent = {
       teaser: 'A cart that survives guests, sign-ins and restarts',
       summary:
         'A delivery app built for a client. People browse the stores in their area, fill a cart, check out and follow the order until it arrives.',
+      screens: [
+        { title: 'Stores near you', alt: 'Wafir screen listing the stores in the customer’s area' },
+        { title: 'Cart', alt: 'Wafir cart screen' },
+        { title: 'Order tracking', alt: 'Wafir screen following an order to delivery' },
+      ],
       role: 'Sole Flutter developer of the customer app',
       platforms: 'Android, on Google Play',
       problem: [
@@ -179,6 +189,11 @@ export const en: LocalizedContent = {
       teaser: 'Identity verification on a single screen, driven by its state',
       summary:
         'Maan puts a citizen’s dealings with the municipality in one place: complaints with a location and photos, voting on municipal projects, volunteering, donations and identity verification.',
+      screens: [
+        { title: 'Complaints', alt: 'Maan screen listing complaints and their status' },
+        { title: 'Identity verification', alt: 'Maan identity verification screen' },
+        { title: 'Project voting', alt: 'Maan screen for voting on municipal projects' },
+      ],
       role: 'Sole Flutter developer',
       platforms: 'Android and iOS',
       problem: [
@@ -237,6 +252,11 @@ export const en: LocalizedContent = {
       teaser: 'My own product, from requirements and brand to a working booking flow',
       summary:
         'Mishwar is my own product: a booking platform for farms and rural retreats in Syria. I took it from an idea to requirements, a brand and a working customer app.',
+      screens: [
+        { title: 'Farm details', alt: 'Mishwar farm details screen' },
+        { title: 'Booking', alt: 'Mishwar booking screen with the hold countdown' },
+        { title: 'My bookings', alt: 'Mishwar screen listing the customer’s bookings' },
+      ],
       role: 'Founder and sole developer',
       platforms: 'Flutter customer app. Owner app and admin panel planned.',
       problem: [

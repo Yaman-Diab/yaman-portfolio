@@ -281,7 +281,7 @@ const { strings } = Astro.props;
   }
 
   .demo__pane :global(li.is-waiting span:last-child) {
-    color: var(--accent-warm);
+    color: var(--accent);
     font-weight: 600;
   }
 
@@ -301,7 +301,7 @@ const { strings } = Astro.props;
 
   @keyframes flash {
     from {
-      background: var(--apricot);
+      background: color-mix(in srgb, var(--accent) 30%, var(--surface));
     }
   }
 

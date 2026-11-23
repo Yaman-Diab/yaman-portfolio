@@ -31,26 +31,34 @@ It is the only one that is specific to this person. Many developers can show a p
 
 ## Palette
 
-Damascus is called the city of jasmine. It is ringed by the Ghouta orchards and known for its apricots. Those three things give the paper, the green and the accent.
+Yaman chose four colours (November 2026). They are used in roughly the proportions of the swatch they came from: mostly paper, then mist, then blue, with navy as the smallest and strongest band.
 
 | Token | HEX | Use |
 |---|---|---|
-| Ghouta | `#0C3A34` | Hero, expertise, contact, header |
-| Ghouta deep | `#072824` | Scrolled header, transition backdrop |
-| Ghouta soft | `#14493F` | Raised surfaces on green |
-| Jasmine | `#F6F7F1` | Paper sections, text on green |
-| Jasmine dim | `#E9EDE4` | Alternate paper sections |
-| Ink | `#11211E` | Text on paper |
-| Ink soft | `#4C5F59` | Secondary text on paper |
-| Sage | `#A9C7BD` | Secondary text on green |
-| Apricot | `#FFB24D` | Accent: markers, primary button, second name |
-| Apricot deep | `#9A5200` | Accent text on paper |
-| Leaf | `#6FD3A8` / `#0F5A4E` | "Live" and "synced" states |
-| Pomegranate | `#FF8A8E` / `#B8323A` | "Offline" and "rejected" states |
+| Paper | `#F9F7F7` | Main background: hero, work, experience, writing |
+| Mist | `#DBE2EF` | Expertise band, case study top, project panel hover |
+| Blue | `#3F72AF` | Accent: markers, primary buttons, the second name |
+| Navy | `#112D4E` | Text, phone frames, contact band |
 
-Every text pairing meets WCAG AA. The lowest is apricot deep on jasmine dim at 4.9:1.
+Derived from those four:
 
-There is no blue. The site is single-theme by choice: the green and paper blocks are the identity, and a dark mode would flatten them.
+| Token | HEX | Use |
+|---|---|---|
+| Paper tint | `#ECF0F6` | About, recognition, project panels |
+| Blue deep | `#2F5C93` | Accent text on mist and tint, button hover |
+| Blue light | `#8FB3E3` | Accent on navy |
+| Ink soft | `#4A5C76` | Secondary text on light grounds |
+| Navy text | `#B9C8DD` | Secondary text on navy |
+| OK | `#17704A` / `#6FD3A8` | "Live" and "synced", on light / on navy |
+| Danger | `#B3323C` / `#FF9196` | "Offline" and "rejected", on light / on navy |
+
+Every text pairing meets WCAG AA. The lowest is OK green on mist at 4.67:1. Plain blue is used for text only on paper and white (4.6 to 5:1); on mist and tint the deeper blue takes over.
+
+The site is single-theme by choice. Its sections already alternate light and dark grounds.
+
+## Phone frames
+
+Every project has three phone frames: on the home page they stand at the bottom of the project panel, and on the case study they straddle the edge between the mist top and the paper page. A frame shows the real screenshot when `src/assets/screens/<project>/<n>.png` exists, and otherwise the app and screen names. The frames are drawn in CSS and scale with container units, so one component works at every size.
 
 ## Typography
 

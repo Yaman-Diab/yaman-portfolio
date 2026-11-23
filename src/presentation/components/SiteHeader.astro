@@ -51,17 +51,18 @@ const links = [
     position: sticky;
     inset-block-start: 0;
     z-index: 50;
-    background: var(--ghouta);
-    color: var(--jasmine);
+    --focus: var(--blue);
+    background: var(--paper);
+    color: var(--navy);
     transition:
       background-color var(--dur) ease,
       box-shadow var(--dur) ease;
   }
 
   .site-header.is-scrolled {
-    background: color-mix(in srgb, var(--ghouta-deep) 92%, transparent);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 1px 0 var(--line-green);
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow: 0 1px 0 var(--line);
   }
 
   .site-header__inner {
@@ -83,7 +84,7 @@ const links = [
   }
 
   .site-header__mark .nuqta {
-    color: var(--apricot);
+    color: var(--blue);
     transition: transform var(--dur) var(--ease-out);
   }
 
@@ -99,7 +100,7 @@ const links = [
 
   .site-header__nav a {
     padding-block: 0.4rem;
-    color: var(--sage);
+    color: var(--ink-soft);
     text-decoration: none;
     background: linear-gradient(currentColor, currentColor) no-repeat;
     background-size: 0 1.5px;
@@ -114,7 +115,7 @@ const links = [
   }
 
   .site-header__nav a:hover {
-    color: var(--jasmine);
+    color: var(--navy);
     background-size: 100% 1.5px;
   }
 
@@ -123,7 +124,7 @@ const links = [
     align-items: center;
     min-height: 2.5rem;
     padding: 0.3rem 0.9rem;
-    border: 1.5px solid var(--line-green);
+    border: 1.5px solid var(--line-strong);
     border-radius: var(--radius);
     font-family: var(--font-display);
     font-size: var(--text-sm);
@@ -136,9 +137,9 @@ const links = [
   }
 
   .language-switch:hover {
-    border-color: var(--apricot);
-    background: var(--apricot);
-    color: var(--ink);
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--paper);
   }
 
   @media (min-width: 48rem) {

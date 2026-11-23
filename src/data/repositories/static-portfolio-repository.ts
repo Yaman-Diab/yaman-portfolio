@@ -6,6 +6,7 @@ import type { PortfolioRepository } from '@/domain/repositories/portfolio-reposi
 import { ar } from '../content/ar';
 import { en } from '../content/en';
 import { EXPERTISE_IDS, EXPERTISE_TOOLS, LINKS, NAMES, PROJECT_FACTS } from '../content/facts';
+import { screenImage } from '../content/screens';
 import type { LocalizedContent } from '../content/types';
 import { assertSameShape, validateContent } from '../validation/content-schema';
 
@@ -46,6 +47,10 @@ export class StaticPortfolioRepository implements PortfolioRepository {
     const { projects, statusLabels, linkLabels } = this.content[locale];
     return PROJECT_FACTS.map((facts) => ({
       ...projects[facts.slug],
+      screens: projects[facts.slug].screens.map((screen, index) => ({
+        ...screen,
+        image: screenImage(facts.slug, index + 1),
+      })),
       slug: facts.slug,
       year: facts.year,
       status: facts.status,

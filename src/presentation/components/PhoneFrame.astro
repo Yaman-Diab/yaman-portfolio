@@ -1,0 +1,142 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Picture } from 'astro:assets';
+import type { Screen } from '@/domain/entities/project';
+
+interface Props {
+  screen: Screen;
+  /** Shown inside an empty frame, above the screen's name. */
+  appName: string;
+  /** The `sizes` attribute for the screenshot, matching where the frame is laid out. */
+  sizes: string;
+  /** Show the screen's name under the phone. */
+  caption?: boolean;
+  /** The frame repeats content found elsewhere, so screen readers skip it. */
+  decorative?: boolean;
+}
+
+const { screen, appName, sizes, caption = false, decorative = false } = Astro.props;
+// The data layer passes the build tool's own image object through unchanged.
+const image = screen.image as ImageMetadata | undefined;
+---
+
+<figure class="phone" data-empty={image ? undefined : ''}>
+  <div class="phone__device">
+    <div class="phone__screen">
+      {
+        image ? (
+          <Picture
+            src={image}
+            alt={decorative ? '' : screen.alt}
+            formats={['avif']}
+            fallbackFormat="webp"
+            width={720}
+            widths={[240, 360, 540, 720]}
+            sizes={sizes}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div class="phone__empty" aria-hidden={decorative ? 'true' : undefined}>
+            <span class="nuqta" aria-hidden="true" />
+            <span class="phone__app">{appName}</span>
+            {/* With a caption below, the name would only repeat. */}
+            {!caption && <span class="phone__title">{screen.title}</span>}
+          </div>
+        )
+      }
+    </div>
+  </div>
+  {caption && <figcaption>{screen.title}</figcaption>}
+</figure>
+
+<style>
+  /* Everything inside scales with the phone's width, so one frame works at any size. */
+  .phone {
+    container-type: inline-size;
+    width: 100%;
+    margin: 0;
+  }
+
+  .phone__device {
+    position: relative;
+    aspect-ratio: 9 / 19.5;
+    padding: 3.4cqi;
+    border-radius: 15cqi;
+    background: var(--device, var(--navy));
+    box-shadow: var(--shadow-device);
+  }
+
+  .phone__screen {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 12cqi;
+    background: linear-gradient(165deg, var(--mist), var(--paper-tint) 55%, var(--paper));
+  }
+
+  /* Camera hole. */
+  .phone__screen::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset-block-start: 2.8cqi;
+    left: 50%;
+    width: 3.6cqi;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--device, var(--navy));
+    translate: -50% 0;
+  }
+
+  .phone__screen :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* No screenshot yet: the frame names the screen it is waiting for. */
+  .phone__empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 3cqi;
+    padding: 10cqi;
+    text-align: center;
+  }
+
+  .phone__empty .nuqta {
+    margin-block-end: 2cqi;
+    color: var(--blue);
+    font-size: 9cqi;
+  }
+
+  .phone__app {
+    color: var(--ink-soft);
+    font-size: 6.5cqi;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .phone__title {
+    color: var(--navy);
+    font-family: var(--font-display);
+    font-size: 9.5cqi;
+    font-weight: 650;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  [dir='rtl'] .phone__title {
+    line-height: 1.45;
+  }
+
+  figcaption {
+    margin-block-start: var(--space-4);
+    font-weight: 600;
+    text-align: center;
+  }
+</style>

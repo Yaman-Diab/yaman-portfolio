@@ -12,7 +12,7 @@ const { locale, recognitions } = Astro.props;
 const t = useUi(locale);
 ---
 
-<section class="section theme-paper-dim" id="recognition">
+<section class="section theme-tint" id="recognition">
   <div class="wrap">
     <h2 class="section__title">{t.recognition.title}</h2>
 
@@ -53,7 +53,7 @@ const t = useUi(locale);
 
   .recognition__year {
     font-variant-numeric: tabular-nums;
-    color: var(--accent-warm);
+    color: var(--accent);
     font-weight: 600;
     font-size: var(--text-sm);
   }

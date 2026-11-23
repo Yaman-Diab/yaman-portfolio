@@ -27,6 +27,23 @@ export interface Challenge {
   demo?: DemoKind;
 }
 
+/**
+ * A processed screenshot. The data layer hands over the image object its
+ * build tool produced, unchanged, so the presentation layer can optimise it.
+ */
+export interface ScreenImage {
+  src: string;
+  width: number;
+  height: number;
+}
+
+/** One of the app's main screens. `image` is empty until a screenshot is added. */
+export interface Screen {
+  title: string;
+  alt: string;
+  image?: ScreenImage;
+}
+
 export interface ProjectLink {
   kind: 'store' | 'source';
   label: string;
@@ -46,6 +63,8 @@ export interface Project {
   /** The hardest part, in one line. Revealed on hover in the list. */
   teaser: string;
   summary: string;
+  /** Three main screens, in the order they are shown. */
+  screens: Screen[];
   role: string;
   platforms: string;
   problem: string[];

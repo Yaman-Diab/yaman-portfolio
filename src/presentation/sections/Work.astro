@@ -2,6 +2,7 @@
 import { routes } from '@/app/routes';
 import type { Locale } from '@/domain/entities/locale';
 import type { Project } from '@/domain/entities/project';
+import PhoneFrame from '@/presentation/components/PhoneFrame.astro';
 import StatusPill from '@/presentation/components/StatusPill.astro';
 import { useUi } from '@/presentation/i18n/ui';
 
@@ -14,29 +15,48 @@ const { locale, projects } = Astro.props;
 const t = useUi(locale);
 ---
 
-<section class="section theme-paper-dim" id="work">
+<section class="section theme-paper" id="work">
   <div class="wrap">
     <header class="work__head">
       <h2 class="section__title">{t.work.title}</h2>
       <p class="section__intro">{t.work.intro}</p>
     </header>
 
-    <ul class="work__list" data-inview>
+    <ul class="work__list">
       {
-        projects.map((project, index) => (
-          <li data-reveal style={`--i:${index}`}>
-            <a class="work-row" href={routes.project(locale, project.slug)} aria-label={`${project.name}. ${t.work.open}`}>
-              <span class="work-row__name" style={`view-transition-name: project-${project.slug}`}>
-                {project.name}
-              </span>
-              <span class="work-row__text">
-                <span class="work-row__tagline">{project.tagline}</span>
-                <span class="work-row__teaser">{project.teaser}</span>
-              </span>
-              <span class="work-row__meta">
-                <StatusPill status={project.status} label={project.statusLabel} />
-                <span class="work-row__year">{project.year}</span>
-              </span>
+        projects.map((project) => (
+          <li data-inview>
+            <a
+              class="project theme-tint"
+              href={routes.project(locale, project.slug)}
+              aria-label={`${project.name}: ${project.tagline}. ${t.work.open}`}
+            >
+              <div class="project__text">
+                <h3 class="project__name" style={`view-transition-name: project-${project.slug}`}>
+                  {project.name}
+                </h3>
+                <p class="project__tagline">{project.tagline}</p>
+                <p class="project__teaser">{project.teaser}</p>
+                <p class="project__meta">
+                  <StatusPill status={project.status} label={project.statusLabel} />
+                  <span class="project__year">{project.year}</span>
+                </p>
+                <span class="project__cta">
+                  {t.work.open}
+                  <span class="project__arrow" aria-hidden="true" />
+                </span>
+              </div>
+
+              <div class="project__phones" aria-hidden="true">
+                {project.screens.map((screen) => (
+                  <PhoneFrame
+                    screen={screen}
+                    appName={project.name}
+                    sizes="(min-width: 60rem) 12rem, 28vw"
+                    decorative
+                  />
+                ))}
+              </div>
             </a>
           </li>
         ))
@@ -53,120 +73,154 @@ const t = useUi(locale);
   }
 
   .work__list {
-    border-block-start: 1px solid var(--rule);
+    display: grid;
+    gap: var(--space-6);
   }
 
-  .work__list li {
-    border-block-end: 1px solid var(--rule);
+  /* ---------- One project ---------- */
+
+  .project {
+    --pad: clamp(1.5rem, 1rem + 2.6vw, 3.5rem);
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--pad) var(--pad) 0;
+    overflow: clip;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: background-color var(--dur) var(--ease-out);
   }
 
-  .work-row {
-    position: relative;
+  .project:hover,
+  .project:focus-visible {
+    background: var(--mist);
+  }
+
+  .project__text {
     display: grid;
     gap: var(--space-3);
-    padding: var(--space-6) clamp(0rem, 1.5vw, 1.5rem);
-    text-decoration: none;
-    isolation: isolate;
-    transition: color var(--dur) var(--ease-out);
+    align-content: center;
+    justify-items: start;
   }
 
-  /* The green fill sweeps in from where reading starts. */
-  .work-row::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--ghouta);
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform var(--dur) var(--ease-out);
-  }
-
-  [dir='rtl'] .work-row::before {
-    transform-origin: right center;
-  }
-
-  .work-row__name {
-    width: fit-content;
-    font-family: var(--font-display);
+  .project__name {
     font-size: var(--text-3xl);
     font-weight: 650;
-    line-height: var(--leading-tight);
     letter-spacing: -0.03em;
-    transition: translate var(--dur) var(--ease-out);
   }
 
-  [dir='rtl'] .work-row__name {
-    letter-spacing: 0;
+  [dir='rtl'] .project__name {
     font-size: calc(var(--text-3xl) * 0.9);
+    letter-spacing: 0;
   }
 
-  .work-row__text {
-    display: grid;
-    gap: var(--space-1);
-    align-content: center;
+  .project__tagline {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: var(--leading-snug);
   }
 
-  .work-row__tagline {
+  .project__teaser {
+    max-width: 38ch;
+    color: var(--fg-muted);
+  }
+
+  .project__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-5);
+    margin-block-start: var(--space-2);
+  }
+
+  .project__year {
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .project__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    margin-block-start: var(--space-3);
+    color: var(--accent);
     font-weight: 600;
   }
 
-  .work-row__teaser {
-    color: var(--fg-muted);
-    transition: color var(--dur) var(--ease-out);
+  /* A chevron pointing the way the page reads. */
+  .project__arrow {
+    width: 0.5em;
+    height: 0.5em;
+    border-block-start: 2px solid currentColor;
+    border-inline-end: 2px solid currentColor;
+    transform: rotate(calc(var(--dir) * 45deg));
+    transition: translate var(--dur) var(--ease-out);
   }
 
-  .work-row__meta {
+  .project:hover .project__arrow,
+  .project:focus-visible .project__arrow {
+    translate: calc(var(--dir) * 0.3rem) 0;
+  }
+
+  /* ---------- Phones ----------
+   * Three screens stand at the bottom edge of the panel and are cut off by it.
+   * They rise when the panel scrolls into view, and fan out on hover.
+   */
+
+  .project__phones {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-5);
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4%;
+    padding-inline: 2%;
   }
 
-  .work-row__year {
-    font-variant-numeric: tabular-nums;
-    color: var(--fg-muted);
-    transition: color var(--dur) var(--ease-out);
+  .project__phones > :global(.phone) {
+    flex: 0 0 29%;
+    translate: 0 16%;
+    transition:
+      translate var(--dur-slow) var(--ease-out),
+      rotate var(--dur-slow) var(--ease-out);
+  }
+
+  .project__phones > :global(.phone:nth-child(2)) {
+    translate: 0 7%;
+  }
+
+  :global(.js) li:not(.is-inview) .project__phones > :global(.phone) {
+    translate: 0 45%;
   }
 
   @media (hover: hover) {
-    .work-row:hover,
-    .work-row:focus-visible {
-      color: var(--jasmine);
-      --ok: var(--leaf);
-      --accent-warm: var(--apricot);
+    .project:hover .project__phones > :global(.phone:nth-child(1)) {
+      translate: calc(var(--dir) * -6%) 11%;
+      rotate: calc(var(--dir) * -3deg);
     }
 
-    .work-row:hover::before,
-    .work-row:focus-visible::before {
-      transform: scaleX(1);
+    .project:hover .project__phones > :global(.phone:nth-child(2)) {
+      translate: 0 2%;
     }
 
-    .work-row:hover .work-row__name,
-    .work-row:focus-visible .work-row__name {
-      translate: calc(var(--dir) * 0.75rem) 0;
-    }
-
-    .work-row:hover .work-row__teaser,
-    .work-row:hover .work-row__year,
-    .work-row:focus-visible .work-row__teaser,
-    .work-row:focus-visible .work-row__year {
-      color: var(--sage);
+    .project:hover .project__phones > :global(.phone:nth-child(3)) {
+      translate: calc(var(--dir) * 6%) 11%;
+      rotate: calc(var(--dir) * 3deg);
     }
   }
 
   @media (min-width: 60rem) {
-    .work-row {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 5fr) minmax(0, 3fr);
-      align-items: center;
-      column-gap: var(--space-6);
-      padding-block: var(--space-7);
+    .project {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: end;
+      column-gap: var(--space-7);
     }
 
-    .work-row__meta {
-      flex-direction: column;
-      align-items: flex-end;
-      gap: var(--space-2);
+    .project__text {
+      align-self: center;
+      padding-block-end: var(--pad);
+    }
+
+    /* Every other project puts its phones first, for rhythm down the page. */
+    .work__list > li:nth-child(even) .project__text {
+      order: 2;
     }
   }
 </style>
