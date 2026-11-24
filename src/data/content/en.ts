@@ -129,9 +129,9 @@ export const en: LocalizedContent = {
       summary:
         'A delivery app built for a client. People browse the stores in their area, fill a cart, check out and follow the order until it arrives.',
       screens: [
-        { title: 'Stores near you', alt: 'Wafir screen listing the stores in the customer’s area' },
-        { title: 'Cart', alt: 'Wafir cart screen' },
-        { title: 'Order tracking', alt: 'Wafir screen following an order to delivery' },
+        { title: 'Splash screen', alt: 'Wafir splash screen with the app logo' },
+        { title: 'Home', alt: 'Wafir home screen with offers, the delivery area, search and store categories' },
+        { title: 'Search', alt: 'Wafir search screen listing stores and their opening hours, filtered by category' },
       ],
       role: 'Sole Flutter developer of the customer app',
       platforms: 'Android, on Google Play',
