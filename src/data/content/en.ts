@@ -198,9 +198,18 @@ export const en: LocalizedContent = {
       summary:
         'Maan puts a citizen’s dealings with the municipality in one place: complaints with a location and photos, voting on municipal projects, volunteering, donations and identity verification.',
       screens: [
-        { title: 'Complaints', alt: 'Maan screen listing complaints and their status' },
-        { title: 'Identity verification', alt: 'Maan identity verification screen' },
-        { title: 'Project voting', alt: 'Maan screen for voting on municipal projects' },
+        {
+          title: 'Profile',
+          alt: 'Maan profile screen with the verified badge, identity details that cannot be edited, the citizenship and authentication indexes, and the user’s activity',
+        },
+        {
+          title: 'Complaints',
+          alt: 'Maan complaints screen listing each complaint with its type, status, place and votes, with filters and a button to file a new one',
+        },
+        {
+          title: 'Account verification',
+          alt: 'Maan account verification form with the personal details, the national ID number and the ID document upload',
+        },
       ],
       role: 'Sole Flutter developer',
       platforms: 'Android and iOS',
