@@ -60,9 +60,17 @@ export const en: LocalizedContent = {
       summary:
         'One learning engine for three audiences: kids, general English from Pre-A1 to B2, and a school curriculum. Arabic-first, built for a client against a .NET API owned by a separate backend team.',
       screens: [
-        { title: 'Home map', alt: 'Engleazia home screen with the map of lessons' },
-        { title: 'Lesson', alt: 'A lesson screen in Engleazia' },
-        { title: 'Offline downloads', alt: 'Engleazia screen for lessons saved offline' },
+        { title: 'Home', alt: 'Engleazia home screen with the daily goal, the streak and the map of units' },
+        {
+          title: 'Interactive video',
+          alt: 'Engleazia interactive video screen: a test video above the dialogue, with the Arabic translation of the current line',
+          // No-break spaces keep the owner's name and the licence on one line each.
+          credit: 'Test video: Big Buck Bunny © Blender Foundation, CC BY 3.0',
+        },
+        {
+          title: 'AI conversations',
+          alt: 'Engleazia conversation screen listing practice dialogues by unit, with the AI conversations left for today',
+        },
       ],
       role: 'Sole mobile developer. Author of the product requirements and the backend guide.',
       platforms: 'Android and iOS',

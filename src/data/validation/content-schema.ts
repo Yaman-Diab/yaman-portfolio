@@ -24,7 +24,7 @@ const projectText = z.object({
   tagline: text,
   teaser: text,
   summary: text,
-  screens: z.array(z.object({ title: text, alt: text })).length(3),
+  screens: z.array(z.object({ title: text, alt: text, credit: text.optional() })).length(3),
   role: text,
   platforms: text,
   problem: z.array(text).min(1),
@@ -129,6 +129,9 @@ export function assertSameShape(
       same(`${slug}.challenges[${index}].flow`, challengeA.flow?.nodes.length, challengeB?.flow?.nodes.length);
     });
     same(`${slug}.screens`, pa.screens.length, pb.screens.length);
+    pa.screens.forEach((screenA, index) => {
+      same(`${slug}.screens[${index}].credit`, Boolean(screenA.credit), Boolean(pb.screens[index]?.credit));
+    });
     same(`${slug}.outcome`, pa.outcome.length, pb.outcome.length);
     same(`${slug}.responsibilities`, pa.responsibilities.length, pb.responsibilities.length);
   }

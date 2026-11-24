@@ -86,6 +86,7 @@ Everything you would normally change is in `src/data/content/`.
 | The portrait | Replace `src/assets/yaman-diab.webp` (square, at least 900px) |
 | Phone screenshots | Add `1.png`, `2.png`, `3.png` to `src/assets/screens/<project>/` (see the README there) |
 | The names of the three screens | `screens` under each project in `en.ts` and `ar.ts` |
+| A credit for someone else's material in a screenshot (a test video, a photo) | `credit` on that screen, in both `en.ts` and `ar.ts`. It shows under the phone on the case study. |
 | Colours, type sizes, spacing | `src/presentation/styles/tokens.css` |
 | The social preview image | `scripts/generate-og.mjs`, then `npm run og` |
 

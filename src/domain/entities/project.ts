@@ -41,6 +41,8 @@ export interface ScreenImage {
 export interface Screen {
   title: string;
   alt: string;
+  /** Credit for someone else's material that appears in the screenshot, such as a test video. */
+  credit?: string;
   image?: ScreenImage;
 }
 
