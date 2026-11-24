@@ -253,9 +253,9 @@ export const en: LocalizedContent = {
       summary:
         'Mishwar is my own product: a booking platform for farms and rural retreats in Syria. I took it from an idea to requirements, a brand and a working customer app.',
       screens: [
-        { title: 'Farm details', alt: 'Mishwar farm details screen' },
-        { title: 'Booking', alt: 'Mishwar booking screen with the hold countdown' },
-        { title: 'My bookings', alt: 'Mishwar screen listing the customer’s bookings' },
+        { title: 'Farm details', alt: 'Mishwar farm details screen with photos, the price per day, a trust score and the amenities' },
+        { title: 'Booking request', alt: 'Mishwar booking request screen with a calendar of free and booked days and the number of guests' },
+        { title: 'My bookings', alt: 'Mishwar screen listing the customer’s bookings, with one request waiting for the owner and its countdown' },
       ],
       role: 'Founder and sole developer',
       platforms: 'Flutter customer app. Owner app and admin panel planned.',
