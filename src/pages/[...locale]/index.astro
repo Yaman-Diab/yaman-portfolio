@@ -4,12 +4,11 @@ import { localeParams, routes } from '@/app/routes';
 import type { Locale } from '@/domain/entities/locale';
 import BaseLayout from '@/presentation/layouts/BaseLayout.astro';
 import About from '@/presentation/sections/About.astro';
-import Experience from '@/presentation/sections/Experience.astro';
 import Expertise from '@/presentation/sections/Expertise.astro';
 import Hero from '@/presentation/sections/Hero.astro';
-import Recognition from '@/presentation/sections/Recognition.astro';
+import Journey from '@/presentation/sections/Journey.astro';
 import Work from '@/presentation/sections/Work.astro';
-import Writing from '@/presentation/sections/Writing.astro';
+import Faq from '@/presentation/sections/Faq.astro';
 
 export function getStaticPaths() {
   return localeParams();
@@ -21,14 +20,18 @@ interface Props {
 
 const { locale } = Astro.props;
 const profile = portfolioRepository.getProfile(locale);
+const projects = portfolioRepository.getProjects(locale);
 ---
 
 <BaseLayout locale={locale} description={profile.metaDescription} profile={profile} pathFor={routes.home}>
   <Hero locale={locale} profile={profile} />
+  <Work locale={locale} projects={projects} />
   <About locale={locale} profile={profile} />
-  <Work locale={locale} projects={portfolioRepository.getProjects(locale)} />
   <Expertise locale={locale} groups={portfolioRepository.getExpertise(locale)} />
-  <Experience locale={locale} career={portfolioRepository.getCareer(locale)} />
-  <Recognition locale={locale} recognitions={portfolioRepository.getRecognitions(locale)} />
-  <Writing writing={portfolioRepository.getWriting(locale)} />
+  <Journey
+    locale={locale}
+    career={portfolioRepository.getCareer(locale)}
+    recognitions={portfolioRepository.getRecognitions(locale)}
+  />
+  <Faq faq={portfolioRepository.getFaq(locale)} />
 </BaseLayout>

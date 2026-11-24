@@ -1,0 +1,580 @@
+---
+/**
+ * The offline answer queue from Engleazia, drawn as a system: a phone that
+ * queues answers, a wire that carries them, a server that counts each ID
+ * once, and a terminal that prints the requests. Packets travel along the
+ * wire; a repeat bounces back marked as a duplicate.
+ */
+import type { UiStrings } from '@/presentation/i18n/ui';
+
+interface Props {
+  strings: UiStrings['syncDemo'];
+}
+
+const { strings } = Astro.props;
+---
+
+<div class="sync" data-sync data-strings={JSON.stringify(strings)}>
+  <div class="sync__controls">
+    <button class="sync__switch" type="button" role="switch" aria-checked="true" data-sync-toggle>
+      <span class="sync__switch-track"><span class="sync__switch-dot"></span></span>
+      <span data-sync-state>{strings.online}</span>
+    </button>
+    <button class="sync__btn sync__btn--primary" type="button" data-sync-answer>{strings.answer}</button>
+    <button class="sync__btn" type="button" data-sync-resend disabled>{strings.resend}</button>
+  </div>
+
+  <div class="sync__system">
+    <!-- The phone and its local queue -->
+    <div class="sync__phone">
+      <p class="sync__label">{strings.phone}</p>
+      <div class="sync__screen">
+        <ul class="sync__queue" data-sync-queue>
+          <li class="sync__empty">{strings.empty}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- The wire, where packets travel -->
+    <div class="sync__wire" data-sync-wire aria-hidden="true">
+      <span class="sync__line"></span>
+      <span class="sync__cut">×</span>
+    </div>
+
+    <!-- The server and its set of seen IDs -->
+    <div class="sync__server">
+      <p class="sync__label">{strings.server}</p>
+      <p class="sync__count"><strong data-sync-count>0</strong><span>{strings.counted}</span></p>
+      <ul class="sync__ids" data-sync-ids dir="ltr"></ul>
+    </div>
+  </div>
+
+  <!-- What went over the wire -->
+  <div class="sync__terminal" dir="ltr">
+    <div class="sync__terminal-bar"><i></i><i></i><i></i><span>sync.log</span></div>
+    <ol class="sync__lines" data-sync-lines>
+      <li class="is-dim">$ waiting for answers…</li>
+    </ol>
+  </div>
+  <p class="visually-hidden" role="status" aria-live="polite" data-sync-status></p>
+</div>
+
+<style>
+  .sync {
+    display: grid;
+    gap: var(--space-5);
+    color: var(--mist);
+  }
+
+  /* ---------- Controls ---------- */
+
+  .sync__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .sync__switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding: 0.3rem 1rem 0.3rem 0.4rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--white);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .sync__switch-track {
+    position: relative;
+    width: 2.6rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    background: var(--ok-on-dark);
+    transition: background-color 300ms ease;
+  }
+
+  .sync__switch-dot {
+    position: absolute;
+    top: 3px;
+    inset-inline-start: 3px;
+    width: calc(1.5rem - 6px);
+    height: calc(1.5rem - 6px);
+    border-radius: 50%;
+    background: var(--white);
+    translate: calc(var(--dir) * 1.1rem) 0;
+    transition: translate 300ms var(--ease-out);
+  }
+
+  .sync__switch[aria-checked='false'] .sync__switch-track {
+    background: var(--red-on-dark);
+  }
+
+  .sync__switch[aria-checked='false'] .sync__switch-dot {
+    translate: 0 0;
+  }
+
+  .sync__btn {
+    min-height: 2.75rem;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .sync__btn:hover:not([disabled]) {
+    border-color: var(--white);
+  }
+
+  .sync__btn--primary {
+    border-color: var(--white);
+    background: var(--white);
+    color: var(--navy);
+  }
+
+  .sync__btn--primary:hover {
+    background: var(--blue-light);
+  }
+
+  .sync__btn[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* ---------- System ---------- */
+
+  .sync__system {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(4rem, 1.2fr) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .sync__label {
+    margin-block-end: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy-text);
+  }
+
+  :global([dir='rtl']) .sync__label {
+    font-family: var(--font-body);
+    letter-spacing: 0.02em;
+    font-size: var(--text-xs);
+  }
+
+  .sync__phone,
+  .sync__server {
+    padding: var(--space-4);
+    border: 1px solid var(--line-dark);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.03);
+    min-height: 15rem;
+  }
+
+  .sync__screen {
+    padding: 0.5rem;
+    border-radius: 16px;
+    background: #050e1c;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .sync__queue {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 10rem;
+    align-content: start;
+  }
+
+  .sync__queue li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.78rem;
+    animation: sync-in 400ms var(--ease-out);
+  }
+
+  .sync__queue li span:first-child {
+    font-family: var(--font-mono);
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .sync__queue .is-waiting span:last-child {
+    color: #f2c48d;
+  }
+
+  .sync__queue .is-synced span:last-child {
+    color: var(--ok-on-dark);
+  }
+
+  .sync__queue .sync__empty {
+    justify-content: center;
+    background: none;
+    color: var(--navy-text);
+    animation: none;
+  }
+
+  .sync__count {
+    display: grid;
+    margin-block-end: var(--space-3);
+  }
+
+  .sync__count strong {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 200;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .sync__count span {
+    color: var(--navy-text);
+    font-size: var(--text-xs);
+  }
+
+  .sync__ids {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .sync__ids li {
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    background: rgba(111, 211, 168, 0.12);
+    color: var(--ok-on-dark);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    transition: background-color 600ms ease;
+  }
+
+  .sync__ids li.is-flash {
+    background: rgba(255, 92, 99, 0.3);
+    color: var(--white);
+  }
+
+  /* ---------- Wire and packets ---------- */
+
+  .sync__wire {
+    position: relative;
+    height: 2rem;
+  }
+
+  .sync__line {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 2px;
+    background: linear-gradient(calc(var(--dir) * 90deg), var(--blue-light), var(--ok-on-dark));
+    translate: 0 -50%;
+    transition: opacity 300ms ease;
+  }
+
+  .sync__cut {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--red-on-dark);
+    color: var(--white);
+    font-weight: 700;
+    translate: -50% -50%;
+    scale: 0;
+    transition: scale 300ms var(--ease-out);
+  }
+
+  .sync__wire.is-offline .sync__line {
+    opacity: 0.25;
+    background: repeating-linear-gradient(90deg, var(--navy-text) 0 6px, transparent 6px 12px);
+  }
+
+  .sync__wire.is-offline .sync__cut {
+    scale: 1;
+  }
+
+  .sync__wire :global(.sync__packet) {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 0;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    background: var(--blue-light);
+    color: var(--navy);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    white-space: nowrap;
+    translate: 0 -50%;
+    box-shadow: 0 0 14px rgba(143, 179, 227, 0.7);
+  }
+
+  .sync__wire :global(.sync__packet.is-dup) {
+    background: var(--red-on-dark);
+    color: var(--white);
+    box-shadow: 0 0 14px rgba(255, 92, 99, 0.7);
+  }
+
+  /* ---------- Terminal ---------- */
+
+  .sync__terminal {
+    border: 1px solid var(--line-dark);
+    border-radius: 16px;
+    background: #040b17;
+    overflow: hidden;
+  }
+
+  .sync__terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.55rem 0.9rem;
+    border-block-end: 1px solid var(--line-dark);
+    color: var(--navy-text);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+
+  .sync__terminal-bar i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--line-dark);
+  }
+
+  .sync__terminal-bar span {
+    margin-inline-start: 0.5rem;
+  }
+
+  .sync__lines {
+    display: grid;
+    gap: 0.2rem;
+    height: 9.5rem;
+    padding: 0.75rem 1rem;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .sync__lines li {
+    animation: sync-in 300ms var(--ease-out);
+  }
+
+  .sync__lines :global(.is-dim) {
+    color: #5d7aa1;
+  }
+
+  .sync__lines :global(.is-ok) {
+    color: var(--ok-on-dark);
+  }
+
+  .sync__lines :global(.is-warn) {
+    color: #f2c48d;
+  }
+
+  .sync__lines :global(.is-bad) {
+    color: var(--red-on-dark);
+  }
+
+  @keyframes sync-in {
+    from {
+      opacity: 0;
+      translate: 0 0.4rem;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .sync__system {
+      grid-template-columns: 1fr;
+    }
+
+    .sync__wire {
+      height: 3rem;
+    }
+  }
+</style>
+
+<script>
+  interface Strings {
+    online: string;
+    offline: string;
+    empty: string;
+    waiting: string;
+    synced: string;
+    logQueued: string;
+    logSynced: string;
+    logFlushed: string;
+    logDuplicate: string;
+    logOffline: string;
+    logOnline: string;
+  }
+
+  interface Attempt {
+    id: string;
+    synced: boolean;
+  }
+
+  const fill = (template: string, values: Record<string, string | number>) =>
+    template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''));
+  const clock = () => new Date().toTimeString().slice(0, 8);
+
+  function mount(root: HTMLElement): void {
+    const strings = JSON.parse(root.dataset.strings ?? '{}') as Strings;
+    const $ = <T extends Element>(selector: string) => root.querySelector<T>(selector)!;
+    const toggle = $<HTMLButtonElement>('[data-sync-toggle]');
+    const stateLabel = $<HTMLElement>('[data-sync-state]');
+    const answer = $<HTMLButtonElement>('[data-sync-answer]');
+    const resend = $<HTMLButtonElement>('[data-sync-resend]');
+    const queue = $<HTMLElement>('[data-sync-queue]');
+    const wire = $<HTMLElement>('[data-sync-wire]');
+    const count = $<HTMLElement>('[data-sync-count]');
+    const ids = $<HTMLElement>('[data-sync-ids]');
+    const lines = $<HTMLElement>('[data-sync-lines]');
+    const status = $<HTMLElement>('[data-sync-status]');
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let online = true;
+    let next = 1;
+    const attempts: Attempt[] = [];
+    // The server's memory: an ID it has seen is never counted again. That is the whole trick.
+    const seen = new Set<string>();
+    let last: string | undefined;
+
+    const print = (text: string, tone = '') => {
+      const line = document.createElement('li');
+      line.textContent = `${clock()}  ${text}`;
+      if (tone) line.className = tone;
+      lines.append(line);
+      while (lines.children.length > 40) lines.firstElementChild?.remove();
+      lines.scrollTop = lines.scrollHeight;
+    };
+
+    const say = (text: string) => (status.textContent = text);
+
+    // A packet runs along the wire; a duplicate turns back halfway.
+    const fly = (id: string, duplicate = false): Promise<void> => {
+      if (still) return Promise.resolve();
+      const packet = document.createElement('span');
+      packet.className = `sync__packet${duplicate ? ' is-dup' : ''}`;
+      packet.textContent = id;
+      wire.append(packet);
+      const distance = wire.clientWidth - packet.offsetWidth;
+      const dir = document.documentElement.dir === 'rtl' ? -1 : 1;
+      const frames = duplicate
+        ? [
+            { transform: 'translateX(0)' },
+            { transform: `translateX(${dir * distance}px)`, offset: 0.55 },
+            { transform: `translateX(${dir * distance * 0.6}px)`, opacity: 0 },
+          ]
+        : [{ transform: 'translateX(0)' }, { transform: `translateX(${dir * distance}px)`, opacity: 0.9 }];
+      return packet
+        .animate(frames, { duration: duplicate ? 1100 : 700, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' })
+        .finished.then(() => packet.remove());
+    };
+
+    const render = (flash?: string) => {
+      queue.replaceChildren(
+        ...(attempts.length === 0
+          ? [Object.assign(document.createElement('li'), { className: 'sync__empty', textContent: strings.empty })]
+          : attempts.slice(-6).map((attempt) => {
+              const row = document.createElement('li');
+              row.className = attempt.synced ? 'is-synced' : 'is-waiting';
+              row.append(
+                Object.assign(document.createElement('span'), { textContent: attempt.id, dir: 'ltr' }),
+                Object.assign(document.createElement('span'), {
+                  textContent: attempt.synced ? strings.synced : strings.waiting,
+                }),
+              );
+              return row;
+            })),
+      );
+      ids.replaceChildren(
+        ...[...seen].slice(-12).map((id) => {
+          const chip = Object.assign(document.createElement('li'), { textContent: id });
+          if (id === flash) chip.className = 'is-flash';
+          return chip;
+        }),
+      );
+      count.textContent = String(seen.size);
+      toggle.setAttribute('aria-checked', String(online));
+      stateLabel.textContent = online ? strings.online : strings.offline;
+      wire.classList.toggle('is-offline', !online);
+      resend.disabled = !online || !last;
+    };
+
+    const deliver = async (attempt: Attempt) => {
+      print(`POST /answers  {"id":"${attempt.id}"}`, 'is-dim');
+      await fly(attempt.id);
+      seen.add(attempt.id);
+      attempt.synced = true;
+      last = attempt.id;
+      print(`201 Created    ${attempt.id} counted`, 'is-ok');
+      render();
+    };
+
+    answer.addEventListener('click', () => {
+      const attempt: Attempt = { id: `a-${String(next++).padStart(2, '0')}`, synced: false };
+      attempts.push(attempt);
+      render();
+      if (online) {
+        say(fill(strings.logSynced, { id: attempt.id }));
+        void deliver(attempt);
+      } else {
+        say(fill(strings.logQueued, { id: attempt.id }));
+        print(`queue.push    ${attempt.id}  (offline)`, 'is-warn');
+      }
+    });
+
+    toggle.addEventListener('click', async () => {
+      online = !online;
+      render();
+      if (!online) {
+        say(strings.logOffline);
+        print('network      DOWN', 'is-bad');
+        return;
+      }
+      print('network      UP', 'is-ok');
+      const waiting = attempts.filter((attempt) => !attempt.synced);
+      say(waiting.length > 0 ? fill(strings.logFlushed, { count: waiting.length }) : strings.logOnline);
+      for (const attempt of waiting) await deliver(attempt);
+    });
+
+    resend.addEventListener('click', async () => {
+      if (!last) return;
+      const id = last;
+      print(`POST /answers  {"id":"${id}"}  (retry)`, 'is-dim');
+      await fly(id, true);
+      print(`200 OK         ${id} already counted, ignored`, 'is-bad');
+      say(fill(strings.logDuplicate, { id }));
+      render(id);
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-sync]').forEach(mount);
+</script>

@@ -1,0 +1,291 @@
+---
+/**
+ * One small app screen that can switch between Arabic and English. On the
+ * switch, every piece glides from where it was to where it belongs in the
+ * other direction (a FLIP animation: measure, flip, then animate the
+ * difference). Built with logical properties only, the way the apps are.
+ * The sample content is taken from Engleazia's own home screen.
+ */
+import type { UiStrings } from '@/presentation/i18n/ui';
+
+interface Props {
+  strings: UiStrings['lab']['rtl'];
+  rtl: boolean;
+}
+
+const { strings, rtl } = Astro.props;
+const first = rtl ? strings.ar : strings.en;
+---
+
+<div class="mirror" data-mirror data-copy={JSON.stringify({ ar: strings.ar, en: strings.en })}>
+  <div class="mirror__switch" role="group" aria-label={strings.switchLabel}>
+    <button type="button" data-mirror-to="ar" aria-pressed={rtl ? 'true' : 'false'}>العربية</button>
+    <button type="button" data-mirror-to="en" aria-pressed={rtl ? 'false' : 'true'}>English</button>
+  </div>
+
+  <div class="mirror__phone">
+    <div class="mirror__app" dir={rtl ? 'rtl' : 'ltr'} lang={rtl ? 'ar' : 'en'} data-mirror-app>
+      <div class="mirror__bar">
+        <span class="mirror__back" data-flip="back">‹</span>
+        <strong data-flip="title" data-text="title">{first.title}</strong>
+        <span class="mirror__streak" data-flip="streak">7</span>
+      </div>
+      <p class="mirror__greeting" data-flip="greeting" data-text="greeting">{first.greeting}</p>
+      <div class="mirror__progress" data-flip="progress">
+        <span data-text="level">{first.level}</span>
+        <span class="mirror__track"><i></i></span>
+      </div>
+      <ul class="mirror__list">
+        {
+          first.units.map((unit, i) => (
+            <li data-flip={`unit-${i}`}>
+              <span class="mirror__badge">{i + 1}</span>
+              <span class="mirror__unit" data-text={`unit-${i}`}>
+                {unit}
+              </span>
+              <span class="mirror__chevron">›</span>
+            </li>
+          ))
+        }
+      </ul>
+      <button class="mirror__cta" type="button" tabindex="-1" data-flip="cta" data-text="cta">{first.cta}</button>
+    </div>
+  </div>
+  <p class="mirror__note">{strings.note}</p>
+</div>
+
+<style>
+  .mirror {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-5);
+  }
+
+  .mirror__switch {
+    display: inline-flex;
+    padding: 0.3rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+
+  .mirror__switch button {
+    min-height: 2.5rem;
+    padding: 0.3rem 1.2rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--fg-muted);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 300ms ease,
+      color 300ms ease;
+  }
+
+  .mirror__switch button[aria-pressed='true'] {
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  .mirror__phone {
+    width: min(100%, 20rem);
+    padding: 0.6rem;
+    border-radius: 2.6rem;
+    background: linear-gradient(135deg, #8b9097, #2b2f34 40%, #9aa0a7 80%);
+    box-shadow: 0 50px 80px -40px rgba(11, 33, 64, 0.6);
+  }
+
+  .mirror__app {
+    display: grid;
+    gap: 0.9rem;
+    min-height: 30rem;
+    padding: 1.5rem 1.1rem 1.25rem;
+    border-radius: 2.1rem;
+    background: #f6f8fc;
+    color: #0f1f3a;
+    font-family: var(--font-body);
+    overflow: hidden;
+  }
+
+  .mirror__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .mirror__bar strong {
+    flex: 1;
+    font-size: 1.05rem;
+  }
+
+  .mirror__back {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #e6ecf7;
+    font-size: 1.2rem;
+  }
+
+  [dir='rtl'] .mirror__back,
+  [dir='rtl'] .mirror__chevron {
+    transform: scaleX(-1);
+  }
+
+  .mirror__streak {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #d9480f;
+  }
+
+  .mirror__greeting {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .mirror__progress {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #5b6b85;
+  }
+
+  .mirror__track {
+    height: 6px;
+    border-radius: 999px;
+    background: #dde5f3;
+    overflow: hidden;
+  }
+
+  /* Progress fills from the reading start: right in Arabic, left in English. */
+  .mirror__track i {
+    display: block;
+    width: 25%;
+    height: 100%;
+    border-radius: inherit;
+    background: #2563ea;
+  }
+
+  .mirror__list {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .mirror__list li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 14px;
+    background: var(--white);
+    box-shadow: 0 6px 16px -10px rgba(15, 31, 58, 0.25);
+  }
+
+  .mirror__badge {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 10px;
+    background: #2563ea;
+    color: var(--white);
+    font-weight: 700;
+  }
+
+  .mirror__unit {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .mirror__chevron {
+    color: #8a99b3;
+    font-size: 1.3rem;
+  }
+
+  .mirror__cta {
+    min-height: 3rem;
+    margin-block-start: auto;
+    border: 0;
+    border-radius: 16px;
+    background: #2563ea;
+    color: var(--white);
+    font: inherit;
+    font-weight: 700;
+  }
+
+  .mirror__note {
+    max-width: 40ch;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+</style>
+
+<script>
+  interface Copy {
+    title: string;
+    greeting: string;
+    level: string;
+    units: string[];
+    cta: string;
+  }
+
+  function mount(root: HTMLElement): void {
+    const app = root.querySelector<HTMLElement>('[data-mirror-app]')!;
+    const copy = JSON.parse(root.dataset.copy ?? '{}') as Record<'ar' | 'en', Copy>;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-mirror-to]')];
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const texts = (lang: 'ar' | 'en'): Record<string, string> => {
+      const c = copy[lang];
+      return {
+        title: c.title,
+        greeting: c.greeting,
+        level: c.level,
+        cta: c.cta,
+        ...Object.fromEntries(c.units.map((unit, i) => [`unit-${i}`, unit])),
+      };
+    };
+
+    const switchTo = (lang: 'ar' | 'en') => {
+      if (app.lang === lang) return;
+      const pieces = [...app.querySelectorAll<HTMLElement>('[data-flip]')];
+      // First: where everything is now.
+      const before = new Map(pieces.map((piece) => [piece, piece.getBoundingClientRect()]));
+
+      // Last: flip the direction and the words.
+      app.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      app.lang = lang;
+      const words = texts(lang);
+      app.querySelectorAll<HTMLElement>('[data-text]').forEach((node) => {
+        node.textContent = words[node.dataset.text ?? ''] ?? node.textContent;
+      });
+      buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.mirrorTo === lang)));
+      if (still) return;
+
+      // Invert and play: each piece starts where it was and glides home.
+      pieces.forEach((piece, i) => {
+        const was = before.get(piece)!;
+        const now = piece.getBoundingClientRect();
+        const dx = was.left - now.left;
+        const dy = was.top - now.top;
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+        piece.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }], {
+          duration: 750,
+          delay: i * 40,
+          easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+          fill: 'backwards',
+        });
+      });
+    };
+
+    buttons.forEach((button) => button.addEventListener('click', () => switchTo(button.dataset.mirrorTo as 'ar' | 'en')));
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-mirror]').forEach(mount);
+</script>

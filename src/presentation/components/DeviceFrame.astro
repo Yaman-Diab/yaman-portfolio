@@ -1,0 +1,406 @@
+---
+/**
+ * A titanium iPhone frame (Dynamic Island, side buttons, glass glare) that
+ * holds one or more screens.
+ *
+ * With `interactive`, it becomes a small prototype: tap the screen, swipe,
+ * use the arrow buttons or the dots to move between screens, with an iOS
+ * push transition (script: scripts/device.ts).
+ *
+ * Live screens: anything passed in the "screens" slot is added after the
+ * screenshots as extra slides. Each must be a `<div class="device__slide">`.
+ * That is where a project's interactive screens plug in
+ * (see features/case-study/interactive/).
+ */
+import type { ImageMetadata } from 'astro';
+import { Picture } from 'astro:assets';
+import type { Screen } from '@/domain/entities/project';
+import Icon from '@/presentation/components/Icon.astro';
+
+interface Props {
+  screens: Screen[];
+  appName: string;
+  /** The `sizes` attribute for the screenshots. */
+  sizes: string;
+  interactive?: boolean;
+  /** Load the first screen right away (above the fold). */
+  eager?: boolean;
+  /** Labels for the controls, in the page's language. */
+  labels?: { previous: string; next: string; screen: string };
+  class?: string;
+  /** The frame repeats content found elsewhere, so screen readers skip it. */
+  decorative?: boolean;
+}
+
+const {
+  screens,
+  appName,
+  sizes,
+  interactive = false,
+  eager = false,
+  labels,
+  class: className,
+  decorative = false,
+} = Astro.props;
+const hasExtra = Astro.slots.has('screens');
+---
+
+<figure
+  class:list={['device', className]}
+  data-device={interactive ? '' : undefined}
+  aria-hidden={decorative ? 'true' : undefined}
+  aria-roledescription={interactive ? 'carousel' : undefined}
+  aria-label={interactive ? appName : undefined}
+>
+  <div class="device__body">
+    <span class="device__button device__button--action" aria-hidden="true"></span>
+    <span class="device__button device__button--up" aria-hidden="true"></span>
+    <span class="device__button device__button--down" aria-hidden="true"></span>
+    <span class="device__button device__button--power" aria-hidden="true"></span>
+
+    <div class="device__bezel">
+      <div class="device__screen" data-device-screen>
+        <div class="device__track" data-device-track>
+          {
+            screens.map((screen, index) => {
+              const image = screen.image as ImageMetadata | undefined;
+              return (
+                <div
+                  class="device__slide"
+                  data-title={screen.title}
+                  aria-hidden={index === 0 ? undefined : 'true'}
+                  role={interactive ? 'group' : undefined}
+                  aria-roledescription={interactive ? 'slide' : undefined}
+                  aria-label={interactive ? screen.title : undefined}
+                >
+                  {image ? (
+                    <Picture
+                      src={image}
+                      alt={decorative ? '' : screen.alt}
+                      formats={['avif']}
+                      fallbackFormat="webp"
+                      width={720}
+                      widths={[320, 480, 720]}
+                      sizes={sizes}
+                      loading={eager && index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      draggable="false"
+                    />
+                  ) : (
+                    <div class="device__empty">
+                      <span class="device__empty-app">{appName}</span>
+                      <span class="device__empty-title">{screen.title}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          }
+          {hasExtra && <slot name="screens" />}
+        </div>
+        <span class="device__island" aria-hidden="true"></span>
+        <span class="device__glare" aria-hidden="true"></span>
+        <span class="device__home" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  {
+    interactive && labels && (
+      <figcaption class="device__controls">
+        <button class="device__arrow" type="button" data-device-prev aria-label={labels.previous}>
+          <Icon name="arrowRight" flip class="device__arrow-icon device__arrow-icon--back" />
+        </button>
+        <span class="device__dots" data-device-dots role="tablist" aria-label={labels.screen}>
+          {screens.map((screen, index) => (
+            <button
+              class="device__dot"
+              type="button"
+              role="tab"
+              aria-label={screen.title}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              data-device-dot={index}
+            />
+          ))}
+        </span>
+        <button class="device__arrow" type="button" data-device-next aria-label={labels.next}>
+          <Icon name="arrowRight" flip class="device__arrow-icon" />
+        </button>
+        <span class="device__title" data-device-title aria-live="polite">{screens[0]?.title}</span>
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  /*
+   * Proportions of a 6.1" Pro phone: 71.5 × 146.6 mm, a 1.5 mm titanium band
+   * and a thin black border around the glass.
+   */
+  .device {
+    --w: 100%;
+    position: relative;
+    width: var(--w);
+    margin: 0;
+  }
+
+  .device__body {
+    position: relative;
+    aspect-ratio: 71.5 / 146.6;
+    padding: 2.1%;
+    border-radius: 16.5% / 8%;
+    background:
+      linear-gradient(
+        135deg,
+        #8b9097 0%,
+        #3a3e44 18%,
+        #1d2024 40%,
+        #2b2f34 62%,
+        #9aa0a7 82%,
+        #3a3e44 100%
+      );
+    box-shadow:
+      inset 0 0 0 0.6px rgba(255, 255, 255, 0.35),
+      inset 0 0 0 2px rgba(0, 0, 0, 0.6),
+      0 2px 0 -1px rgba(255, 255, 255, 0.15),
+      0 50px 80px -30px rgba(5, 14, 28, 0.55),
+      0 30px 40px -30px rgba(5, 14, 28, 0.6);
+  }
+
+  .device__bezel {
+    position: relative;
+    height: 100%;
+    padding: 2.6%;
+    border-radius: 14.5% / 7%;
+    background: #050506;
+  }
+
+  .device__screen {
+    position: relative;
+    height: 100%;
+    border-radius: 12.5% / 5.9%;
+    background: var(--device-screen, #0b2140);
+    overflow: hidden;
+    isolation: isolate;
+    touch-action: pan-y;
+  }
+
+  .device__track {
+    display: flex;
+    height: 100%;
+    transition: transform 520ms cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  .device__track.is-dragging {
+    transition: none;
+  }
+
+  .device__slide,
+  .device__track > :global(.device__slide) {
+    position: relative;
+    flex: 0 0 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .device__slide :global(picture),
+  .device__slide :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .device__empty {
+    display: grid;
+    place-content: center;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1rem;
+    color: var(--navy-text);
+    text-align: center;
+  }
+
+  .device__empty-app {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--white);
+  }
+
+  .device__island {
+    position: absolute;
+    inset-block-start: 1.6%;
+    left: 50%;
+    width: 31%;
+    height: 3.9%;
+    border-radius: 999px;
+    background: #000;
+    translate: -50% 0;
+    z-index: 2;
+  }
+
+  .device__island::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 12%;
+    width: 0.55rem;
+    height: 0.55rem;
+    max-width: 14%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2d3a55, #0b0f18 60%);
+    translate: 0 -50%;
+  }
+
+  .device__glare {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.04) 22%,
+      transparent 38%
+    );
+    pointer-events: none;
+  }
+
+  .device__home {
+    position: absolute;
+    inset-block-end: 1.1%;
+    left: 50%;
+    width: 34%;
+    height: 0.55%;
+    min-height: 3px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    translate: -50% 0;
+    z-index: 2;
+  }
+
+  /* Side buttons, drawn outside the band. */
+  .device__button {
+    position: absolute;
+    width: 1.1%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #2a2d31, #7e848b 60%, #2a2d31);
+  }
+
+  .device__button--action {
+    left: -0.8%;
+    top: 17%;
+    height: 4.5%;
+  }
+
+  .device__button--up {
+    left: -0.8%;
+    top: 25%;
+    height: 8%;
+  }
+
+  .device__button--down {
+    left: -0.8%;
+    top: 35%;
+    height: 8%;
+  }
+
+  .device__button--power {
+    right: -0.8%;
+    top: 28%;
+    height: 12%;
+  }
+
+  /* ---------- Prototype controls ---------- */
+
+  [data-device] .device__screen {
+    cursor: pointer;
+  }
+
+  .device__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    margin-block-start: 1.25rem;
+  }
+
+  .device__arrow {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) ease,
+      border-color var(--dur-fast) ease;
+  }
+
+  .device__arrow:hover {
+    border-color: currentColor;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  .device__arrow[disabled] {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .device__arrow :global(.device__arrow-icon--back) {
+    rotate: 180deg;
+  }
+
+  .device__dots {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .device__dot {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .device__dot::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.35;
+    translate: -50% -50%;
+    transition:
+      width var(--dur) var(--ease-out),
+      opacity var(--dur) ease;
+  }
+
+  .device__dot[aria-selected='true']::before {
+    width: 1.25rem;
+    opacity: 1;
+  }
+
+  .device__title {
+    flex-basis: 100%;
+    text-align: center;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    opacity: 0.85;
+  }
+</style>

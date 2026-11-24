@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Mishwar ("an outing"): a winding road over the hills toward the sun. -->
+  <defs>
+    <clipPath id="tile"><rect width="512" height="512" rx="116"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="512" height="512" fill="#c1652f"/>
+    <circle cx="352" cy="148" r="56" fill="#f3e6cf"/>
+    <path d="M0 318Q118 248 240 306T512 288V512H0Z" fill="#7e3d18" opacity="0.55"/>
+    <path d="M0 384Q150 330 300 380T512 360V512H0Z" fill="#7e3d18" opacity="0.6"/>
+    <path d="M152 540C152 400 334 392 304 300S196 214 236 120" fill="none" stroke="#f3e6cf" stroke-width="58" stroke-linecap="round"/>
+    <path d="M152 540C152 400 334 392 304 300S196 214 236 120" fill="none" stroke="#c1652f" stroke-width="9" stroke-linecap="round" stroke-dasharray="22 24"/>
+  </g>
+</svg>

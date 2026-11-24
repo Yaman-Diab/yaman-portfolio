@@ -1,77 +1,226 @@
 ---
+import { routes } from '@/app/routes';
 import type { Locale } from '@/domain/entities/locale';
 import type { Profile } from '@/domain/entities/profile';
+import Icon from '@/presentation/components/Icon.astro';
+import LanguageToggle from '@/presentation/components/LanguageToggle.astro';
 import { useUi } from '@/presentation/i18n/ui';
 
 interface Props {
   locale: Locale;
   profile: Profile;
+  /** This same page in the other language. */
+  alternateHref: string;
 }
 
-const { locale, profile } = Astro.props;
+const { locale, profile, alternateHref } = Astro.props;
 const t = useUi(locale);
 const { contact } = profile;
+
+const pages = [
+  { label: t.nav.work, href: routes.section(locale, 'work') },
+  { label: t.nav.about, href: routes.section(locale, 'about') },
+  { label: t.nav.expertise, href: routes.section(locale, 'expertise') },
+  { label: t.nav.experience, href: routes.section(locale, 'experience') },
+  { label: t.nav.lab, href: routes.lab(locale) },
+  { label: t.nav.faq, href: routes.section(locale, 'faq') },
+];
+
+const cards = [
+  { icon: 'phone', label: t.contact.phone, value: contact.phoneDisplay, href: `tel:${contact.phone}`, ltr: true },
+  { icon: 'github', label: 'GitHub', value: 'Yaman-Diab', href: contact.github, ltr: true, me: true },
+  { icon: 'linkedin', label: 'LinkedIn', value: 'yaman-diab', href: contact.linkedin, ltr: true, me: true },
+] as const;
 ---
 
-<footer class="contact theme-dark" id="contact">
+<section class="contact theme-dark" id="contact" aria-labelledby="contact-title">
   <div class="wrap">
-    <h2 class="contact__title">{profile.contactTitle}</h2>
+    <p class="contact__eyebrow"><span class="contact__dot" aria-hidden="true"></span>{t.nav.contact}</p>
+    <h2 class="contact__title" id="contact-title">{profile.contactTitle}</h2>
     <p class="contact__body">{profile.contactBody}</p>
 
     <div class="contact__email">
-      <a class="contact__address" href={`mailto:${contact.email}`} dir="ltr">{contact.email}</a>
+      <a class="contact__address" href={`mailto:${contact.email}`} data-magnetic="0.12">
+        <span dir="ltr">{contact.email}</span>
+        <span class="contact__arrow" aria-hidden="true"><Icon name="arrowUpRight" flip /></span>
+      </a>
       <button
-        class="button button--ghost contact__copy"
+        class="contact__copy"
         type="button"
+        data-magnetic="0.4"
         data-copy={contact.email}
         data-copied={t.contact.copied}
         aria-label={t.contact.copyEmailLabel}
       >
+        <Icon name="copy" />
         <span data-copy-label aria-live="polite">{t.contact.copy}</span>
       </button>
     </div>
 
-    <dl class="contact__details">
-      <div>
-        <dt>{t.contact.phone}</dt>
-        <dd><a href={`tel:${contact.phone}`} dir="ltr">{contact.phoneDisplay}</a></dd>
-      </div>
-      <div>
-        <dt>GitHub</dt>
-        <dd><a href={contact.github} rel="me noopener" dir="ltr">github.com/Yaman-Diab</a></dd>
-      </div>
-      <div>
-        <dt>LinkedIn</dt>
-        <dd><a href={contact.linkedin} rel="me noopener" dir="ltr">linkedin.com/in/yaman-diab</a></dd>
-      </div>
-      <div>
-        <dt>{t.contact.location}</dt>
-        <dd>{profile.location}</dd>
-      </div>
-    </dl>
+    <ul class="contact__cards">
+      {
+        cards.map((card) => (
+          <li>
+            <a class="card-link" href={card.href} rel={'me' in card ? 'me noopener' : undefined}>
+              <span class="card-link__icon">
+                <Icon name={card.icon} />
+              </span>
+              <span class="card-link__text">
+                <span class="card-link__label">{card.label}</span>
+                <span class="card-link__value" dir={card.ltr ? 'ltr' : undefined}>
+                  {card.value}
+                </span>
+              </span>
+              <Icon name="arrowUpRight" flip class="card-link__arrow" />
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <div class="card-link card-link--static">
+          <span class="card-link__icon">
+            <Icon name="pin" />
+          </span>
+          <span class="card-link__text">
+            <span class="card-link__label">{t.contact.location}</span>
+            <span class="card-link__value">{profile.location}</span>
+          </span>
+          <span class="card-link__time" dir="ltr" data-local-time aria-label={t.footer.localTime}></span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
 
-    <div class="contact__foot">
-      <p>{t.footer.rights}</p>
-      <p>
-        {t.footer.stack}
-        <a href={contact.siteRepository} rel="noopener">{t.footer.source}</a>
-      </p>
+<!--
+  The footer sits under the page and is uncovered as the contact block
+  scrolls away: a ticker, the name, one call to action, three columns of
+  chips, contact pills, a giant outlined word and a slim bottom bar.
+-->
+<footer class="site-footer theme-dark">
+  <div class="site-footer__ticker" aria-hidden="true">
+    <ul class="site-footer__ticker-track">
+      {[...t.footer.ticker, ...t.footer.ticker].map((item) => <li>{item}</li>)}
+    </ul>
+    <ul class="site-footer__ticker-track">
+      {[...t.footer.ticker, ...t.footer.ticker].map((item) => <li>{item}</li>)}
+    </ul>
+  </div>
+
+  <div class="wrap site-footer__main">
+    <span class="site-footer__spark" aria-hidden="true"></span>
+    <p class="site-footer__name">{profile.name}<span>.</span></p>
+    <p class="site-footer__tagline">
+      {profile.positioning}
+      <br />
+      {profile.availability}
+    </p>
+
+    <a class="site-footer__cta" href={`mailto:${contact.email}`} data-magnetic="0.3">
+      <span data-magnetic-label>{t.footer.startProject}</span>
+    </a>
+
+    <div class="site-footer__grid">
+      <nav class="site-footer__col" aria-label={t.footer.navigate}>
+        <span class="site-footer__label">{t.footer.navigate}</span>
+        <ul>
+          {
+            pages.map((page) => (
+              <li>
+                <a class="chip" href={page.href}>
+                  {page.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="site-footer__col">
+        <span class="site-footer__label">{t.footer.connect}</span>
+        <ul>
+          <li><a class="chip" href={contact.github} rel="me noopener">GitHub</a></li>
+          <li><a class="chip" href={contact.linkedin} rel="me noopener">LinkedIn</a></li>
+          <li><a class="chip" href={contact.siteRepository} rel="noopener">{t.footer.source}</a></li>
+        </ul>
+      </div>
     </div>
+
+    <div class="site-footer__pills">
+      <a class="chip chip--wide" href={`mailto:${contact.email}`} dir="ltr">{contact.email}</a>
+      <span class="chip chip--wide chip--static">
+        {profile.location} · <span dir="ltr" data-local-time></span>
+      </span>
+      <LanguageToggle locale={locale} href={alternateHref} />
+    </div>
+  </div>
+
+  <p class="site-footer__giant" aria-hidden="true">{t.footer.giant}</p>
+
+  <div class="wrap site-footer__bottom">
+    <p class="site-footer__copy">{t.footer.rights}</p>
+    <p class="site-footer__built">
+      {t.footer.builtWith} <span class="site-footer__heart" aria-hidden="true"></span> {t.footer.care}
+    </p>
+    <a class="site-footer__top-link" href="#main" aria-label={t.footer.backToTop} data-magnetic="0.4">
+      <span data-magnetic-label><Icon name="arrowUp" /></span>
+    </a>
   </div>
 </footer>
 
 <style>
+  /* ---------- Contact ---------- */
+
   .contact {
-    padding-block: var(--section-pad) var(--space-6);
+    position: relative;
+    padding-block: var(--section-pad);
+    overflow: clip;
+  }
+
+  .contact::before {
+    content: '';
+    position: absolute;
+    inset-block-start: -30%;
+    inset-inline-start: 50%;
+    width: 70vw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--blue) 35%, transparent), transparent 65%);
+    translate: calc(var(--dir) * -50%) 0;
+    filter: blur(40px);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .contact .wrap {
+    position: relative;
+  }
+
+  .contact__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--blue-light);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .contact__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--ok-on-dark);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok-on-dark) 25%, transparent);
   }
 
   .contact__title {
     max-width: 20ch;
+    margin-block-start: var(--space-4);
     font-size: var(--text-3xl);
   }
 
   .contact__body {
-    margin-block-start: var(--space-5);
+    margin-block-start: var(--space-4);
     color: var(--fg-muted);
     font-size: var(--text-lg);
   }
@@ -82,25 +231,69 @@ const { contact } = profile;
     align-items: center;
     gap: var(--space-4) var(--space-5);
     margin-block-start: var(--space-7);
+    padding-block-end: var(--space-6);
+    border-block-end: 1px solid var(--rule);
   }
 
   .contact__address {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
     font-family: var(--font-display);
-    font-size: clamp(1.4rem, 0.6rem + 4.2vw, 3.75rem);
-    font-weight: 600;
+    font-size: clamp(1.5rem, 0.6rem + 4.2vw, 4rem);
+    font-weight: 650;
     letter-spacing: -0.02em;
     line-height: 1.1;
-    color: var(--accent);
-    text-decoration-line: underline;
-    text-decoration-thickness: 2px;
-    text-decoration-color: transparent;
-    text-underline-offset: 0.18em;
+    text-decoration: none;
     overflow-wrap: anywhere;
-    transition: text-decoration-color var(--dur) ease;
   }
 
-  .contact__address:hover {
-    text-decoration-color: currentColor;
+  .contact__arrow {
+    display: grid;
+    place-items: center;
+    width: 1.1em;
+    height: 1.1em;
+    border-radius: 50%;
+    background: var(--blue-light);
+    color: var(--navy);
+    font-size: 0.6em;
+    transition:
+      rotate var(--dur) var(--ease-out),
+      background-color var(--dur) ease;
+  }
+
+  .contact__arrow :global(.icon) {
+    width: 0.6em;
+    height: 0.6em;
+  }
+
+  .contact__address:hover .contact__arrow {
+    /* The arrow is mirrored in Arabic, so it turns the other way to point forward. */
+    rotate: calc(var(--dir) * 45deg);
+    background: var(--white);
+  }
+
+  .contact__copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--navy-text);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) ease,
+      color var(--dur-fast) ease;
+  }
+
+  .contact__copy:hover {
+    border-color: var(--white);
+    color: var(--white);
   }
 
   .contact__copy.is-copied {
@@ -108,50 +301,414 @@ const { contact } = profile;
     color: var(--ok);
   }
 
-  .contact__details {
+  .contact__cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    gap: var(--space-5) var(--space-6);
-    margin-block: var(--space-8) 0;
-    padding-block-start: var(--space-6);
-    border-block-start: 1px solid var(--rule);
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: var(--space-3);
+    margin-block-start: var(--space-6);
   }
 
-  .contact__details dt {
+  .card-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    height: 100%;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--navy-soft) 55%, transparent);
+    text-decoration: none;
+    transition:
+      border-color var(--dur) ease,
+      background-color var(--dur) ease,
+      translate var(--dur) var(--ease-out);
+  }
+
+  a.card-link:hover {
+    border-color: var(--blue-light);
+    background: var(--navy-soft);
+    translate: 0 -3px;
+  }
+
+  .card-link__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: none;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--blue-light) 14%, transparent);
+    color: var(--blue-light);
+  }
+
+  .card-link__text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+  }
+
+  .card-link__label {
     color: var(--fg-muted);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
   }
 
-  .contact__details dd {
-    margin: 0.2rem 0 0;
-    font-weight: 500;
-    /* Latin handles and numbers keep their own direction but align with the page. */
+  .card-link__value {
+    font-weight: 600;
     text-align: start;
+    overflow-wrap: anywhere;
   }
 
-  .contact__details a {
-    display: inline-block;
-    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
-    transition: text-decoration-color var(--dur-fast) ease;
+  .card-link :global(.card-link__arrow) {
+    color: var(--fg-muted);
+    transition:
+      color var(--dur-fast) ease,
+      translate var(--dur) var(--ease-out);
   }
 
-  .contact__details a:hover {
-    text-decoration-color: var(--accent);
+  a.card-link:hover :global(.card-link__arrow) {
+    color: var(--white);
+    translate: calc(var(--dir) * 2px) -2px;
   }
 
-  .contact__foot {
+  .card-link__time {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--blue-light);
+  }
+
+  /* ---------- Footer: uncovered from below ---------- */
+
+  /* The contact block slides away over the footer, which waits underneath. */
+  .contact {
+    z-index: 1;
+    border-end-start-radius: 32px;
+    border-end-end-radius: 32px;
+    box-shadow: 0 40px 60px -30px rgba(0, 0, 0, 0.55);
+  }
+
+  .site-footer {
+    /* Stuck to the bottom, one layer under the page (main and the contact block sit at
+       z-index 1), so it is uncovered as they scroll away and stays clickable. */
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: min(100svh, 56rem);
+    margin-block-start: -32px;
+    padding-block-start: 32px;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 30%, color-mix(in srgb, var(--blue) 16%, transparent), transparent 70%),
+      #071a33;
+    overflow: hidden;
+  }
+
+  .site-footer__ticker {
+    display: flex;
+    padding-block: 1rem;
+    border-block-end: 1px solid var(--line-dark);
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .site-footer__ticker-track {
+    display: flex;
+    flex: none;
+    animation: footer-ticker 60s linear infinite;
+  }
+
+  .site-footer__ticker-track li {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.75rem;
+    padding-inline-end: 1.75rem;
+    color: color-mix(in srgb, var(--white) 38%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .site-footer__ticker-track li::after {
+    content: '/';
+    color: var(--red-on-dark);
+  }
+
+  @keyframes footer-ticker {
+    to {
+      translate: calc(var(--dir) * -100%) 0;
+    }
+  }
+
+  .site-footer__main {
+    position: relative;
+    flex: 1;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-5);
+    padding-block: clamp(3rem, 2rem + 4vw, 5rem) var(--space-6);
+    text-align: center;
+  }
+
+  .site-footer__spark {
+    position: absolute;
+    inset-block-start: 22%;
+    inset-inline-start: 8%;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--red-on-dark);
+    box-shadow: 0 0 24px var(--red-on-dark);
+  }
+
+  .site-footer__name {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 1rem + 6vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    background: linear-gradient(180deg, var(--white), color-mix(in srgb, var(--white) 42%, transparent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  :global([dir='rtl']) .site-footer__name {
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  .site-footer__name span {
+    -webkit-text-fill-color: var(--red-on-dark);
+  }
+
+  .site-footer__tagline {
+    max-width: 40rem;
+    color: color-mix(in srgb, var(--white) 55%, transparent);
+    font-size: var(--text-sm);
+    font-weight: 300;
+    line-height: 1.65;
+  }
+
+  .site-footer__cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3.25rem;
+    margin-block: var(--space-2);
+    padding: 0.8rem 1.75rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--white) 8%, transparent);
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+  }
+
+  .site-footer__cta:hover {
+    background: var(--white);
+    color: var(--navy);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+    width: min(100%, 44rem);
+    margin-block-start: var(--space-4);
+  }
+
+  .site-footer__col {
+    display: grid;
+    gap: 0.9rem;
+    justify-items: center;
+    align-content: start;
+  }
+
+  .site-footer__label {
+    color: color-mix(in srgb, var(--white) 32%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  :global([dir='rtl']) .site-footer__label {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+
+  .site-footer__col ul {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-6);
-    margin-block-start: var(--space-8);
-    padding-block-start: var(--space-5);
-    border-block-start: 1px solid var(--rule);
-    color: var(--fg-muted);
-    font-size: var(--text-sm);
+    justify-content: center;
+    gap: 0.4rem;
   }
 
-  .contact__foot a:hover {
-    color: var(--fg);
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--white) 10%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--white) 4%, transparent);
+    color: color-mix(in srgb, var(--white) 78%, transparent);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color var(--dur-fast) ease,
+      color var(--dur-fast) ease,
+      border-color var(--dur-fast) ease;
+  }
+
+  a.chip:hover {
+    border-color: var(--white);
+    background: var(--white);
+    color: var(--navy);
+  }
+
+  .chip--wide {
+    padding-inline: 1.25rem;
+  }
+
+  .site-footer__pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block-start: var(--space-4);
+  }
+
+  /* The giant word, outlined, cut by the bottom edge. */
+  .site-footer__giant {
+    margin-block: auto -0.28em;
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 1rem + 17vw, 18rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-align: center;
+    white-space: nowrap;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--white) 16%, transparent),
+      color-mix(in srgb, var(--white) 4%, transparent) 62%,
+      transparent
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--white) 10%, transparent);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  :global([dir='rtl']) .site-footer__giant {
+    margin-block-end: -0.45em;
+    letter-spacing: 0;
+  }
+
+  .site-footer__bottom {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-4);
+    padding-block: var(--space-4) var(--space-5);
+  }
+
+  .site-footer__copy {
+    color: color-mix(in srgb, var(--white) 32%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .site-footer__built {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--white) 10%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--white) 5%, transparent);
+    backdrop-filter: blur(10px);
+    color: color-mix(in srgb, var(--white) 40%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  :global([dir='rtl']) .site-footer__copy,
+  :global([dir='rtl']) .site-footer__built {
+    font-family: var(--font-body);
+    letter-spacing: 0.02em;
+    font-size: 0.72rem;
+  }
+
+  .site-footer__heart {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--red-on-dark);
+    box-shadow: 0 0 10px var(--red-on-dark);
+  }
+
+  .site-footer__top-link {
+    justify-self: end;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid color-mix(in srgb, var(--white) 14%, transparent);
+    border-radius: 50%;
+    color: var(--white);
+  }
+
+  .site-footer__top-link:hover {
+    background: var(--white);
+    color: var(--navy);
+  }
+
+  @media (max-width: 48rem) {
+    .site-footer {
+      position: relative;
+      min-height: 0;
+    }
+
+    .site-footer__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .site-footer__bottom {
+      grid-template-columns: 1fr auto;
+    }
+
+    .site-footer__built {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-footer__ticker-track {
+      animation: none;
+    }
   }
 </style>

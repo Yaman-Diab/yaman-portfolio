@@ -1,4 +1,4 @@
-import type { Career, ExpertiseGroup, Recognition, Writing } from '../entities/career';
+import type { Career, ExpertiseGroup, Recognition, Faq } from '../entities/career';
 import type { Locale } from '../entities/locale';
 import type { Profile } from '../entities/profile';
 import type { Project, ProjectSlug } from '../entities/project';
@@ -16,5 +16,5 @@ export interface PortfolioRepository {
   getCareer(locale: Locale): Career;
   getRecognitions(locale: Locale): Recognition[];
   getExpertise(locale: Locale): ExpertiseGroup[];
-  getWriting(locale: Locale): Writing;
+  getFaq(locale: Locale): Faq;
 }

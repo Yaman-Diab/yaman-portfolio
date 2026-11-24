@@ -1,4 +1,4 @@
-import type { ProjectLink, ProjectSlug, ProjectStatus } from '@/domain/entities/project';
+import type { ProjectBrand, ProjectLink, ProjectSlug, ProjectStatus } from '@/domain/entities/project';
 
 /**
  * Facts that are the same in every language: links, years, statuses and
@@ -30,6 +30,8 @@ export interface ProjectFacts {
   status: ProjectStatus;
   stack: string[];
   links: Pick<ProjectLink, 'kind' | 'url'>[];
+  /** Colours sampled from the app's own screens. The logo file is found by name. */
+  brand: Omit<ProjectBrand, 'logo'>;
 }
 
 /** The order here is the order on the site. */
@@ -61,6 +63,7 @@ export const PROJECT_FACTS: ProjectFacts[] = [
     ],
     // The client's repository is not linked on purpose.
     links: [],
+    brand: { primary: '#2563ea', deep: '#1a46a8', accent: '#36b367', onPrimary: '#ffffff', logoKind: 'icon' },
   },
   {
     slug: 'wafir',
@@ -79,6 +82,7 @@ export const PROJECT_FACTS: ProjectFacts[] = [
       'SharedPreferences',
     ],
     links: [{ kind: 'store', url: LINKS.wafirPlay }],
+    brand: { primary: '#4cb050', deep: '#2f7f34', accent: '#f7c749', onPrimary: '#ffffff', logoKind: 'wordmark' },
   },
   {
     slug: 'maan',
@@ -101,6 +105,7 @@ export const PROJECT_FACTS: ProjectFacts[] = [
       'mocktail',
     ],
     links: [{ kind: 'source', url: LINKS.maanRepository }],
+    brand: { primary: '#1e6f5c', deep: '#124a3d', accent: '#e8a33d', onPrimary: '#ffffff', logoKind: 'icon' },
   },
   {
     slug: 'mishwar',
@@ -118,6 +123,7 @@ export const PROJECT_FACTS: ProjectFacts[] = [
       'flutter_screenutil',
     ],
     links: [{ kind: 'source', url: LINKS.mishwarRepository }],
+    brand: { primary: '#c1652f', deep: '#7e3d18', accent: '#f3e6cf', onPrimary: '#ffffff', logoKind: 'icon' },
   },
 ];
 

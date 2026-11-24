@@ -1,4 +1,4 @@
-import type { Career, ExpertiseGroup, Recognition, Writing } from '@/domain/entities/career';
+import type { Career, ExpertiseGroup, Recognition, Faq } from '@/domain/entities/career';
 import type { Locale } from '@/domain/entities/locale';
 import type { Profile } from '@/domain/entities/profile';
 import type { Project, ProjectSlug } from '@/domain/entities/project';
@@ -6,7 +6,7 @@ import type { PortfolioRepository } from '@/domain/repositories/portfolio-reposi
 import { ar } from '../content/ar';
 import { en } from '../content/en';
 import { EXPERTISE_IDS, EXPERTISE_TOOLS, LINKS, NAMES, PROJECT_FACTS } from '../content/facts';
-import { screenImage } from '../content/screens';
+import { brandLogo, screenImage } from '../content/screens';
 import type { LocalizedContent } from '../content/types';
 import { assertSameShape, validateContent } from '../validation/content-schema';
 
@@ -57,6 +57,7 @@ export class StaticPortfolioRepository implements PortfolioRepository {
       statusLabel: statusLabels[facts.status],
       stack: facts.stack,
       links: facts.links.map((link) => ({ ...link, label: linkLabels[link.kind] })),
+      brand: { ...facts.brand, logo: brandLogo(facts.slug) },
     }));
   }
 
@@ -74,10 +75,10 @@ export class StaticPortfolioRepository implements PortfolioRepository {
 
   getExpertise(locale: Locale): ExpertiseGroup[] {
     const { expertise } = this.content[locale];
-    return EXPERTISE_IDS.map((id) => ({ ...expertise[id], tools: EXPERTISE_TOOLS[id] }));
+    return EXPERTISE_IDS.map((id) => ({ id, ...expertise[id], tools: EXPERTISE_TOOLS[id] }));
   }
 
-  getWriting(locale: Locale): Writing {
-    return this.content[locale].writing;
+  getFaq(locale: Locale): Faq {
+    return this.content[locale].faq;
   }
 }

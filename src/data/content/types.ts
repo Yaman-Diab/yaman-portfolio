@@ -1,4 +1,4 @@
-import type { Career, Recognition, Writing } from '@/domain/entities/career';
+import type { Career, Recognition, Faq } from '@/domain/entities/career';
 import type { Profile } from '@/domain/entities/profile';
 import type { Project, ProjectLink, ProjectSlug, ProjectStatus, Screen } from '@/domain/entities/project';
 import type { ExpertiseId } from './facts';
@@ -7,7 +7,7 @@ import type { ExpertiseId } from './facts';
 export type ScreenText = Omit<Screen, 'image'>;
 
 /** The translated part of a project. Facts and screenshots are merged in by the repository. */
-export type ProjectText = Omit<Project, 'slug' | 'year' | 'status' | 'statusLabel' | 'stack' | 'links' | 'screens'> & {
+export type ProjectText = Omit<Project, 'slug' | 'year' | 'status' | 'statusLabel' | 'stack' | 'links' | 'screens' | 'brand'> & {
   screens: ScreenText[];
 };
 
@@ -20,5 +20,5 @@ export interface LocalizedContent {
   career: Career;
   recognitions: Recognition[];
   expertise: Record<ExpertiseId, { title: string; body: string }>;
-  writing: Writing;
+  faq: Faq;
 }

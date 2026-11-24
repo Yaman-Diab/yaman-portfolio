@@ -1,68 +1,185 @@
 ---
 import { routes } from '@/app/routes';
-import { otherLocale, type Locale } from '@/domain/entities/locale';
+import type { Locale } from '@/domain/entities/locale';
+import type { Profile } from '@/domain/entities/profile';
+import Icon from '@/presentation/components/Icon.astro';
+import LanguageToggle from '@/presentation/components/LanguageToggle.astro';
+import LogoMark from '@/presentation/components/LogoMark.astro';
 import { useUi } from '@/presentation/i18n/ui';
 
 interface Props {
   locale: Locale;
-  name: string;
+  profile: Profile;
   /** This same page in the other language. */
   alternateHref: string;
 }
 
-const { locale, name, alternateHref } = Astro.props;
+const { locale, profile, alternateHref } = Astro.props;
 const t = useUi(locale);
-const other = otherLocale(locale);
 
+/** Sections of the home page, then the Lab, which is a page of its own. */
 const links = [
-  { id: 'work', label: t.nav.work },
-  { id: 'about', label: t.nav.about },
-  { id: 'experience', label: t.nav.experience },
-  { id: 'contact', label: t.nav.contact },
+  { id: 'work', label: t.nav.work, href: routes.section(locale, 'work') },
+  { id: 'about', label: t.nav.about, href: routes.section(locale, 'about') },
+  { id: 'expertise', label: t.nav.expertise, href: routes.section(locale, 'expertise') },
+  { id: 'experience', label: t.nav.experience, href: routes.section(locale, 'experience') },
+  { id: 'lab', label: t.nav.lab, href: routes.lab(locale), page: true },
 ];
+const onLab = Astro.url.pathname.replace(/\/?$/, '/').endsWith('/lab/');
+const index = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
-<header class="site-header" data-site-header>
+<header class="site-header" data-site-header data-tone="light">
+  <span class="site-header__progress" aria-hidden="true"><span data-scroll-progress></span></span>
   <div class="wrap site-header__inner">
-    <a class="site-header__mark" href={routes.home(locale)}>
-      <span class="nuqta" aria-hidden="true"></span>
-      {name}
+    <a class="brand" href={routes.home(locale)} aria-label={t.header.home}>
+      <LogoMark class="brand__mark" />
+      <span class="brand__text" aria-hidden="true">
+        <span class="brand__name">{profile.name}</span>
+        <span class="brand__role">{profile.role}</span>
+      </span>
     </a>
 
-    <nav class="site-header__nav" aria-label={t.navLabel}>
-      {links.map((link) => <a href={routes.section(locale, link.id)}>{link.label}</a>)}
+    <nav class="site-nav" aria-label={t.navLabel}>
+      <ul>
+        {
+          links.map((link, i) => (
+            <li>
+              <a
+                href={link.href}
+                data-nav-link={link.page ? undefined : link.id}
+                aria-current={link.page && onLab ? 'page' : undefined}
+              >
+                <span class="site-nav__index" aria-hidden="true">
+                  {index(i)}
+                </span>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
     </nav>
 
-    <a
-      class="language-switch"
-      href={alternateHref}
-      hreflang={other}
-      lang={other}
-      aria-label={t.switchLanguageLabel}
-      data-language-switch
-    >
-      {t.switchLanguage}
-    </a>
+    <div class="site-header__actions">
+      <LanguageToggle locale={locale} href={alternateHref} class="site-header__lang" />
+      <a class="header-cta" href={routes.section(locale, 'contact')} data-magnetic="0.3">
+        <span>{t.header.cta}</span>
+        <Icon name="arrowUpRight" flip />
+      </a>
+      <button
+        class="menu-button"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-menu"
+        data-menu-open
+      >
+        <span class="visually-hidden">{t.header.menu}</span>
+        <span class="menu-button__bars" aria-hidden="true"><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="menu theme-dark" id="site-menu" data-menu hidden>
+    <nav class="menu__nav" aria-label={t.navLabel}>
+      <ol>
+        {
+          [...links, { id: 'contact', label: t.nav.contact, href: routes.section(locale, 'contact') }].map((link, i) => (
+            <li style={`--i:${i}`}>
+              <a href={link.href} data-menu-link>
+                <span class="menu__index" aria-hidden="true">
+                  {index(i)}
+                </span>
+                <span class="menu__label">{link.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+    <div class="menu__foot">
+      <a class="menu__email" href={`mailto:${profile.contact.email}`} dir="ltr">{profile.contact.email}</a>
+      <div class="menu__row">
+        <a class="menu__social" href={profile.contact.github} rel="me noopener" aria-label="GitHub"
+          ><Icon name="github" /></a
+        >
+        <a class="menu__social" href={profile.contact.linkedin} rel="me noopener" aria-label="LinkedIn"
+          ><Icon name="linkedin" /></a
+        >
+        <LanguageToggle locale={locale} href={alternateHref} class="menu__lang" />
+      </div>
+    </div>
   </div>
 </header>
 
 <style>
+  /*
+   * The header floats over the page. Over dark sections (the hero, the
+   * contact block) it is clear with light text; over light sections it
+   * becomes frosted paper. site.ts sets data-tone as the page scrolls.
+   */
   .site-header {
-    position: sticky;
+    position: fixed;
     inset-block-start: 0;
+    inset-inline: 0;
     z-index: 50;
     --focus: var(--blue);
-    background: var(--paper);
     color: var(--navy);
-    transition:
-      background-color var(--dur) ease,
-      box-shadow var(--dur) ease;
+    transition: color var(--dur) var(--ease-out);
   }
 
-  .site-header.is-scrolled {
-    background: color-mix(in srgb, var(--paper) 86%, transparent);
-    backdrop-filter: blur(12px) saturate(1.4);
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    backdrop-filter: blur(14px) saturate(1.5);
+    -webkit-backdrop-filter: blur(14px) saturate(1.5);
     box-shadow: 0 1px 0 var(--line);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease-out);
+  }
+
+  .site-header.is-scrolled::before {
+    opacity: 1;
+  }
+
+  /* Reading progress: a thin line along the header's lower edge that fills as the page scrolls. */
+  .site-header__progress {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    height: 2px;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity var(--dur) ease;
+  }
+
+  .site-header.is-scrolled .site-header__progress {
+    opacity: 1;
+  }
+
+  .site-header__progress span {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(calc(var(--dir) * 90deg), var(--blue), var(--red));
+    transform: scaleX(var(--progress, 0));
+    transform-origin: var(--progress-origin, left);
+  }
+
+  :global([dir='rtl']) .site-header__progress span {
+    --progress-origin: right;
+  }
+
+  .site-header[data-tone='dark'] {
+    color: var(--white);
+    --focus: var(--blue-light);
+  }
+
+  .site-header[data-tone='dark']::before {
+    background: color-mix(in srgb, var(--navy-deep) 72%, transparent);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--white) 8%, transparent);
   }
 
   .site-header__inner {
@@ -72,79 +189,327 @@ const links = [
     min-height: var(--header-height);
   }
 
-  .site-header__mark {
+  /* ---------- Brand ---------- */
+
+  .brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.6em;
+    gap: 0.7rem;
     margin-inline-end: auto;
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    font-weight: 650;
     text-decoration: none;
   }
 
-  .site-header__mark .nuqta {
-    color: var(--blue);
+  .brand :global(.brand__mark) {
+    width: 2.1rem;
+    flex: none;
+    --mark-bubble: var(--blue);
+  }
+
+  .site-header[data-tone='dark'] .brand :global(.brand__mark) {
+    --mark-bubble: var(--blue-light);
+  }
+
+  .brand__text {
+    display: grid;
+    line-height: 1.15;
+  }
+
+  .brand__name {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .brand__role {
+    font-size: 0.75rem;
+    opacity: 0.65;
+  }
+
+  .brand :global(.mark__bubble),
+  .brand :global(.mark__bar) {
     transition: transform var(--dur) var(--ease-out);
   }
 
-  .site-header__mark:hover .nuqta {
-    transform: rotate(225deg);
+  .brand:hover :global(.mark__bubble) {
+    transform: rotate(-10deg) scale(1.06);
   }
 
-  .site-header__nav {
+  .brand:hover :global(.mark__bar) {
+    transform: translate(6%, -6%);
+  }
+
+  /* ---------- Desktop navigation ---------- */
+
+  .site-nav {
     display: none;
-    gap: var(--space-5);
-    font-size: var(--text-sm);
   }
 
-  .site-header__nav a {
-    padding-block: 0.4rem;
-    color: var(--ink-soft);
-    text-decoration: none;
-    background: linear-gradient(currentColor, currentColor) no-repeat;
-    background-size: 0 1.5px;
-    background-position: 0 100%;
-    transition:
-      color var(--dur-fast) ease,
-      background-size var(--dur) var(--ease-out);
+  .site-nav ul {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.3rem;
+    border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+    border-radius: 999px;
   }
 
-  [dir='rtl'] .site-header__nav a {
-    background-position: 100% 100%;
-  }
-
-  .site-header__nav a:hover {
-    color: var(--navy);
-    background-size: 100% 1.5px;
-  }
-
-  .language-switch {
+  .site-nav a {
     display: inline-flex;
-    align-items: center;
-    min-height: 2.5rem;
-    padding: 0.3rem 0.9rem;
-    border: 1.5px solid var(--line-strong);
-    border-radius: var(--radius);
+    align-items: baseline;
+    gap: 0.4em;
+    padding: 0.45rem 0.95rem;
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    opacity: 0.78;
+    transition:
+      background-color var(--dur-fast) ease,
+      opacity var(--dur-fast) ease;
+  }
+
+  .site-nav a:hover {
+    opacity: 1;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .site-nav a[aria-current='true'],
+  .site-nav a[aria-current='page'] {
+    opacity: 1;
+    background: color-mix(in srgb, currentColor 12%, transparent);
+  }
+
+  .site-nav__index {
     font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--blue);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .site-header[data-tone='dark'] .site-nav__index {
+    color: var(--blue-light);
+  }
+
+  /* ---------- Actions ---------- */
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .site-header :global(.site-header__lang) {
+    display: none;
+  }
+
+  .header-cta {
+    display: none;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.8rem 0.4rem 1.1rem;
+    border-radius: 999px;
+    background: var(--navy);
+    color: var(--white);
     font-size: var(--text-sm);
     font-weight: 600;
     text-decoration: none;
     transition:
-      border-color var(--dur-fast) ease,
       background-color var(--dur-fast) ease,
       color var(--dur-fast) ease;
   }
 
-  .language-switch:hover {
-    border-color: var(--navy);
-    background: var(--navy);
-    color: var(--paper);
+  :global([dir='rtl']) .header-cta {
+    padding: 0.4rem 1.1rem 0.4rem 0.8rem;
   }
 
-  @media (min-width: 48rem) {
-    .site-header__nav {
-      display: flex;
+  .header-cta:hover {
+    background: var(--blue);
+  }
+
+  .header-cta :global(.icon) {
+    transition: translate var(--dur) var(--ease-out);
+  }
+
+  .header-cta:hover :global(.icon) {
+    translate: calc(var(--dir) * 2px) -2px;
+  }
+
+  .site-header[data-tone='dark'] .header-cta {
+    background: var(--white);
+    color: var(--navy);
+  }
+
+  .site-header[data-tone='dark'] .header-cta:hover {
+    background: var(--blue-light);
+  }
+
+  /* ---------- Menu button ---------- */
+
+  .menu-button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .menu-button__bars {
+    display: grid;
+    gap: 5px;
+    width: 1.1rem;
+  }
+
+  .menu-button__bars span {
+    display: block;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    transition:
+      translate var(--dur) var(--ease-out),
+      rotate var(--dur) var(--ease-out),
+      width var(--dur) var(--ease-out);
+  }
+
+  .menu-button__bars span:last-child {
+    width: 65%;
+    justify-self: end;
+  }
+
+  .menu-button[aria-expanded='true'] .menu-button__bars span:first-child {
+    translate: 0 3.25px;
+    rotate: 45deg;
+  }
+
+  .menu-button[aria-expanded='true'] .menu-button__bars span:last-child {
+    width: 100%;
+    translate: 0 -3.25px;
+    rotate: -45deg;
+  }
+
+  /* ---------- Mobile menu ---------- */
+
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: calc(var(--header-height) + var(--space-6)) var(--gutter) var(--space-6);
+    background: var(--navy-deep);
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 600ms var(--ease-in-out);
+  }
+
+  .menu[hidden] {
+    display: none;
+  }
+
+  .menu.is-open {
+    clip-path: inset(0 0 0 0);
+  }
+
+  .menu__nav ol {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .menu__nav a {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding-block: var(--space-2);
+    border-block-end: 1px solid var(--line-dark);
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.2rem + 5vw, 3rem);
+    font-weight: 650;
+    line-height: 1.2;
+    text-decoration: none;
+  }
+
+  .menu__index {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--blue-light);
+  }
+
+  .menu__nav li {
+    opacity: 0;
+    translate: 0 1rem;
+    transition:
+      opacity 400ms var(--ease-out),
+      translate 600ms var(--ease-out);
+  }
+
+  .menu.is-open .menu__nav li {
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: calc(200ms + var(--i) * 60ms);
+  }
+
+  .menu__foot {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .menu__email {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--blue-light);
+    justify-self: start;
+  }
+
+  .menu__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .menu__social {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 999px;
+  }
+
+  .menu :global(.menu__lang) {
+    margin-inline-start: auto;
+  }
+
+  :global(html.menu-open) .site-header {
+    color: var(--white);
+  }
+
+  :global(html.menu-open) .site-header::before {
+    opacity: 0;
+  }
+
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
+
+  @media (min-width: 40rem) {
+    .site-header :global(.site-header__lang),
+    .header-cta {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-nav {
+      display: block;
+    }
+
+    .menu-button,
+    .menu {
+      display: none !important;
     }
   }
 </style>

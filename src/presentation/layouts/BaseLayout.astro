@@ -1,13 +1,15 @@
 ---
 import '@/presentation/styles/base.css';
-import displayLatinFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2?url';
-import displayArabicFont from '@fontsource-variable/fustat/files/fustat-arabic-wght-normal.woff2?url';
+import displayLatinFont from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
+import displayArabicFont from '@fontsource-variable/alexandria/files/alexandria-arabic-wght-normal.woff2?url';
 import bodyLatinFont from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url';
 import bodyArabicFont from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-400-normal.woff2?url';
 import { absoluteUrl, routes } from '@/app/routes';
 import { LOCALES, directionOf, otherLocale, type Locale } from '@/domain/entities/locale';
 import type { Profile } from '@/domain/entities/profile';
 import CursorGlow from '@/presentation/components/CursorGlow.astro';
+import PageCurtain from '@/presentation/components/PageCurtain.astro';
+import type { SplashData } from '@/presentation/features/case-study/splash';
 import SiteFooter from '@/presentation/components/SiteFooter.astro';
 import SiteHeader from '@/presentation/components/SiteHeader.astro';
 import { useUi } from '@/presentation/i18n/ui';
@@ -20,9 +22,11 @@ interface Props {
   profile: Profile;
   /** The address of this same page in a given language. */
   pathFor: (locale: Locale) => string;
+  /** On a case study: the app's splash, shown by the page transition. */
+  splash?: SplashData;
 }
 
-const { locale, title, description, profile, pathFor } = Astro.props;
+const { locale, title, description, profile, pathFor, splash } = Astro.props;
 const t = useUi(locale);
 const dir = directionOf(locale);
 
@@ -90,34 +94,49 @@ const person = {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(person)} />
 
     <script is:inline>
-      document.documentElement.classList.add('js');
-      // A language switch asks for the page-turn transition (see base.css).
-      // The request is used once and always cleared, so it can never leak into a later navigation.
-      function takeTransitionType() {
+      (function () {
+        var root = document.documentElement;
+        root.classList.add('js');
+        // Decide before first paint whether the page opens under the curtain (PageCurtain.astro):
+        // the loader on the first page of a visit, the logo transition after an internal link.
+        // The navigation flag is used once and always cleared, so it never leaks into a later visit.
+        // The logo intro plays when the site is first opened in a tab, on a refresh, or after
+        // a click on the logo. Every other move between pages gets only the slanted lines.
+        var mode = null;
         try {
-          const type = sessionStorage.getItem('view-transition');
-          sessionStorage.removeItem('view-transition');
-          return type;
-        } catch {
-          return null; /* storage blocked: keep the default transition */
+          var nav = performance.getEntriesByType('navigation')[0];
+          var reload = nav && nav.type === 'reload';
+          var logo = sessionStorage.getItem('pt-logo');
+          if (logo || reload || !sessionStorage.getItem('pt-seen')) mode = 'load';
+          else if (sessionStorage.getItem('pt-nav')) mode = 'enter';
+          sessionStorage.removeItem('pt-nav');
+          sessionStorage.removeItem('pt-logo');
+          sessionStorage.setItem('pt-seen', '1');
+        } catch (e) {
+          mode = null; /* storage blocked: no loader, plain navigation */
         }
-      }
-      window.addEventListener('pagereveal', (event) => {
-        const type = takeTransitionType();
-        if (type && event.viewTransition) event.viewTransition.types.add(type);
-      });
-      window.addEventListener('pageshow', () => setTimeout(takeTransitionType, 0));
+        if (mode && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          root.classList.add('pt-' + mode);
+          // Never trap anyone behind the curtain if its script fails to load. curtain.ts cancels this.
+          window.__curtainFailsafe = setTimeout(function () {
+            root.classList.remove('pt-load', 'pt-enter');
+          }, 10000);
+        }
+      })();
     </script>
   </head>
   <body>
+    <PageCurtain name={profile.name} role={profile.role} splash={splash} />
     <a class="skip-link" href="#main">{t.skip}</a>
-    <SiteHeader locale={locale} name={profile.name} alternateHref={pathFor(otherLocale(locale))} />
+    <SiteHeader locale={locale} profile={profile} alternateHref={pathFor(otherLocale(locale))} />
     <main id="main">
       <slot />
     </main>
-    <SiteFooter locale={locale} profile={profile} />
+    <SiteFooter locale={locale} profile={profile} alternateHref={pathFor(otherLocale(locale))} />
     <CursorGlow />
     <script>
+      import '@/presentation/scripts/curtain';
+      import '@/presentation/scripts/device';
       import '@/presentation/scripts/site';
     </script>
   </body>

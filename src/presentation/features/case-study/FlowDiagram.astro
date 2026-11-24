@@ -1,4 +1,10 @@
 ---
+/**
+ * A project's plan as a compact, interactive stepper: numbered steps on one
+ * rail, one step open at a time. It walks through the steps on its own while
+ * in view, and stops the moment the visitor picks a step (scripts/flow.ts).
+ * Without JavaScript every step and its detail stay visible as a list.
+ */
 import type { Flow } from '@/domain/entities/project';
 
 interface Props {
@@ -6,182 +12,242 @@ interface Props {
 }
 
 const { flow } = Astro.props;
-const lastIndex = flow.nodes.length - 1;
+const id = `flow-${Math.random().toString(36).slice(2, 8)}`;
+const pad = (n: number) => String(n).padStart(2, '0');
+const total = flow.nodes.length;
 ---
 
-<figure class="flow" data-inview style={`--n:${flow.nodes.length}`}>
-  <ol class="flow__track">
+<figure class="flow" data-flow style={`--n:${total}`}>
+  <div class="flow__rail" aria-hidden="true"><span class="flow__fill" data-flow-fill></span></div>
+
+  <ol class="flow__steps" role="tablist">
     {
-      flow.nodes.map((node, index) => (
-        <li class="flow__node" style={`--i:${index}`}>
-          <span class="flow__label">{node.label}</span>
-          {node.detail && <span class="flow__detail">{node.detail}</span>}
-          {index < lastIndex && (
-            <span class="flow__link" aria-hidden="true">
-              <span class="flow__packet" />
-            </span>
-          )}
+      flow.nodes.map((node, i) => (
+        <li role="presentation">
+          <button
+            class="flow__step"
+            type="button"
+            role="tab"
+            id={`${id}-tab-${i}`}
+            aria-controls={`${id}-panel-${i}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+            data-flow-step={i}
+          >
+            <span class="flow__num">{pad(i + 1)}</span>
+            <span class="flow__label">{node.label}</span>
+          </button>
         </li>
       ))
     }
   </ol>
+
+  <div class="flow__panels">
+    {
+      flow.nodes.map((node, i) => (
+        <div
+          class="flow__panel"
+          role="tabpanel"
+          id={`${id}-panel-${i}`}
+          aria-labelledby={`${id}-tab-${i}`}
+          data-flow-panel={i}
+          data-active={i === 0 ? '' : undefined}
+        >
+          <span class="flow__of" dir="ltr">
+            {pad(i + 1)} / {pad(total)}
+          </span>
+          <strong>{node.label}</strong>
+          {node.detail && <span class="flow__detail">{node.detail}</span>}
+        </div>
+      ))
+    }
+  </div>
+
   {flow.caption && <figcaption>{flow.caption}</figcaption>}
 </figure>
 
 <style>
   .flow {
-    --gap: 2.25rem;
-    /* Where a packet travels: down the page on phones, along the row on wide screens. */
-    --travel-x: 0px;
-    --travel-y: var(--gap);
+    position: relative;
     margin: 0;
   }
 
-  .flow__track {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap);
+  /* ---------- Steps on a rail ---------- */
+
+  .flow__rail {
+    position: absolute;
+    inset-block-start: 1.25rem;
+    inset-inline: calc(50% / var(--n));
+    height: 2px;
+    background: color-mix(in srgb, var(--fg) 15%, transparent);
   }
 
-  .flow__node {
+  .flow__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(var(--p, 0));
+    transform-origin: var(--from, left);
+    transition: transform 600ms var(--ease-out);
+  }
+
+  :global([dir='rtl']) .flow__fill {
+    --from: right;
+  }
+
+  .flow__steps {
     position: relative;
     display: grid;
-    gap: var(--space-1);
-    align-content: start;
-    flex: 1 1 0;
-    min-width: 0;
-    padding: var(--space-4);
-    border: 1.5px solid var(--fg);
-    border-radius: var(--radius);
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .flow__step {
+    display: grid;
+    justify-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .flow__num {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1.5px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    border-radius: 50%;
     background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition:
+      background-color var(--dur) ease,
+      border-color var(--dur) ease,
+      color var(--dur) ease,
+      scale var(--dur) var(--ease-out);
   }
 
   .flow__label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--fg-muted);
+    transition: color var(--dur) ease;
+  }
+
+  .flow__step.is-passed .flow__num {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .flow__step[aria-selected='true'] .flow__num {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--surface);
+    scale: 1.12;
+  }
+
+  .flow__step[aria-selected='true'] .flow__label,
+  .flow__step:hover .flow__label {
+    color: var(--fg);
+  }
+
+  /* ---------- The open step ---------- */
+
+  .flow__panels {
+    display: grid;
+    margin-block-start: var(--space-5);
+  }
+
+  .flow__panel {
+    grid-area: 1 / 1;
+    display: grid;
+    gap: 0.3rem;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--rule));
+    border-radius: 14px;
+    background: var(--surface);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 0.5rem;
+    transition:
+      opacity 350ms ease,
+      translate 450ms var(--ease-out),
+      visibility 0s linear 450ms;
+  }
+
+  .flow__panel[data-active] {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    transition:
+      opacity 350ms ease,
+      translate 450ms var(--ease-out),
+      visibility 0s;
+  }
+
+  .flow__of {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    justify-self: start;
+  }
+
+  .flow__panel strong {
     font-family: var(--font-display);
-    font-weight: 650;
-    line-height: var(--leading-snug);
+    font-size: var(--text-lg);
+    font-weight: 600;
   }
 
   .flow__detail {
     color: var(--fg-muted);
-    font-size: var(--text-sm);
-    line-height: 1.45;
-  }
-
-  /* The connector to the next step. */
-  .flow__link {
-    position: absolute;
-    inset-block-start: 100%;
-    inset-inline-start: 1.75rem;
-    inline-size: 2px;
-    block-size: var(--gap);
-    background: var(--fg);
-  }
-
-  /* Arrowhead: two borders of a small square, turned to point along the flow. */
-  .flow__link::after {
-    content: '';
-    position: absolute;
-    inset-block-end: 1px;
-    inset-inline-start: 50%;
-    width: 9px;
-    height: 9px;
-    border-block-end: 2px solid var(--fg);
-    border-inline-end: 2px solid var(--fg);
-    transform: translateX(calc(var(--dir) * -50%)) rotate(calc(var(--dir) * 45deg));
-  }
-
-  .flow__packet {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 50%;
-    width: 10px;
-    height: 10px;
-    margin: -5px;
-    background: var(--accent);
-    outline: 2px solid var(--bg);
-    transform: rotate(45deg);
-    opacity: 0;
   }
 
   figcaption {
-    margin-block-start: var(--space-4);
+    margin-block-start: var(--space-3);
     color: var(--fg-muted);
     font-size: var(--text-sm);
   }
 
-  @media (min-width: 48rem) {
-    .flow {
-      --gap: clamp(1.75rem, 3.6vw, 3rem);
-      --travel-x: calc(var(--dir) * var(--gap));
-      --travel-y: 0px;
-    }
-
-    .flow__track {
-      flex-direction: row;
-    }
-
-    .flow__link {
-      inset-block-start: 50%;
-      inset-inline-start: 100%;
-      inline-size: var(--gap);
-      block-size: 2px;
-      margin-block-start: -1px;
-    }
-
-    .flow__link::after {
-      inset-block-end: auto;
-      inset-block-start: 50%;
-      inset-inline-start: auto;
-      inset-inline-end: 1px;
-      border-block-end: 0;
-      border-block-start: 2px solid var(--fg);
-      transform: translateY(-50%) rotate(calc(var(--dir) * 45deg));
-    }
-
-    .flow__packet {
-      inset-block-start: 50%;
-      inset-inline-start: 0;
-    }
+  /* Without the script, it is a plain numbered list. */
+  :global(html:not(.js)) .flow__panel {
+    opacity: 1;
+    visibility: visible;
+    grid-area: auto;
   }
 
-  /* Steps arrive one after another, then packets keep travelling the chain. */
-  @media (prefers-reduced-motion: no-preference) {
-    :global(.js) .flow .flow__node {
-      opacity: 0;
-      translate: 0 0.75rem;
-      transition:
-        opacity var(--dur) var(--ease-out),
-        translate var(--dur-slow) var(--ease-out);
-      transition-delay: calc(var(--i) * 110ms);
+  /* Phones: a vertical rail, labels beside the numbers. */
+  @media (max-width: 40rem) {
+    .flow__rail {
+      inset-block: 1.25rem;
+      inset-inline: 1.2rem auto;
+      width: 2px;
+      height: auto;
     }
 
-    :global(.js) .flow.is-inview .flow__node {
-      opacity: 1;
-      translate: 0 0;
+    .flow__fill {
+      transform: scaleY(var(--p, 0));
+      transform-origin: top;
     }
 
-    .flow.is-inview .flow__packet {
-      animation: travel calc(var(--n) * 0.8s) linear infinite;
-      animation-delay: calc(0.6s + var(--i) * 0.8s);
+    .flow__steps {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
     }
-  }
 
-  @keyframes travel {
-    0% {
-      opacity: 0;
-      translate: 0 0;
-    }
-    3% {
-      opacity: 1;
-    }
-    17% {
-      opacity: 1;
-    }
-    20%,
-    100% {
-      opacity: 0;
-      translate: var(--travel-x) var(--travel-y);
+    .flow__step {
+      grid-template-columns: auto 1fr;
+      justify-items: start;
+      align-items: center;
+      gap: var(--space-3);
+      text-align: start;
     }
   }
 </style>

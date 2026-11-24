@@ -1,0 +1,58 @@
+---
+/**
+ * Yaman's mark: a speech bubble and a slanted stroke that together read as a Y.
+ * Paths come unchanged from the master file (src/assets/brand/logo-master.svg).
+ *
+ * The bubble and the bar are separate groups so the loader and the page
+ * transition can move them on their own. Colour comes from `currentColor`;
+ * the bubble can take its own colour through `--mark-bubble`.
+ */
+import { MARK_PATHS } from './mark';
+
+interface Props {
+  class?: string;
+  /** Adds the track and the clip the loader uses to fill the bar. */
+  progress?: boolean;
+}
+
+const { class: className, progress = false } = Astro.props;
+const { bubble: BUBBLE, bar: BAR } = MARK_PATHS;
+---
+
+<svg class:list={['mark', className]} viewBox="192 296 218 194" aria-hidden="true" focusable="false">
+  {
+    progress && (
+      <defs>
+        <clipPath id="mark-fill-clip">
+          <rect data-mark-fill x="192" y="490" width="218" height="0" />
+        </clipPath>
+      </defs>
+    )
+  }
+  <g class="mark__bubble"><path d={BUBBLE} /></g>
+  {progress && <g class="mark__track"><path d={BAR} /></g>}
+  <g class="mark__bar" clip-path={progress ? 'url(#mark-fill-clip)' : undefined}><path d={BAR} /></g>
+</svg>
+
+<style>
+  .mark {
+    display: block;
+    fill: currentColor;
+    overflow: visible;
+  }
+
+  .mark__bubble {
+    fill: var(--mark-bubble, currentColor);
+    transform-box: fill-box;
+    transform-origin: 100% 100%;
+  }
+
+  .mark__bar {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
+
+  .mark__track {
+    opacity: 0.16;
+  }
+</style>

@@ -20,6 +20,18 @@ for (const [path, module] of Object.entries(files)) {
   if (match) byName.set(`${match[1]}/${match[2]}`, module.default);
 }
 
+const logos = import.meta.glob<{ default: ScreenImage }>('/src/assets/brand/projects/*.{png,svg,webp}', { eager: true });
+const logoByName = new Map<string, ScreenImage>();
+for (const [path, module] of Object.entries(logos)) {
+  const match = path.match(/\/projects\/([^/]+)\.[a-z]+$/i);
+  if (match?.[1]) logoByName.set(match[1], module.default);
+}
+
+/** The app's logo, from src/assets/brand/projects/<project>.png, if it has been added. */
+export function brandLogo(slug: ProjectSlug): ScreenImage | undefined {
+  return logoByName.get(slug);
+}
+
 /** The screenshot for one position (1, 2 or 3) of one project, if it has been added. */
 export function screenImage(slug: ProjectSlug, position: number): ScreenImage | undefined {
   return byName.get(`${slug}/${position}`);

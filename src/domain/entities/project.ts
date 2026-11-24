@@ -46,6 +46,25 @@ export interface Screen {
   image?: ScreenImage;
 }
 
+/**
+ * The app's own colours and logo. A case study opens in them, the way the
+ * app opens on a phone.
+ */
+export interface ProjectBrand {
+  /** The splash colour. */
+  primary: string;
+  /** A darker shade of the splash colour, for depth. */
+  deep: string;
+  /** The app's second colour: buttons, highlights. */
+  accent: string;
+  /** Text and logo colour on the splash. */
+  onPrimary: string;
+  /** "wordmark" sits large across the splash; "icon" sits in a rounded tile. */
+  logoKind: 'wordmark' | 'icon' | 'none';
+  /** Empty until a logo file is added (see screens.ts). */
+  logo?: ScreenImage;
+}
+
 export interface ProjectLink {
   kind: 'store' | 'source';
   label: string;
@@ -76,4 +95,5 @@ export interface Project {
   stack: string[];
   outcome: string[];
   links: ProjectLink[];
+  brand: ProjectBrand;
 }

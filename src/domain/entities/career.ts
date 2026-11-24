@@ -37,19 +37,23 @@ export interface Recognition {
 }
 
 export interface ExpertiseGroup {
+  /** Stable key: architecture, networking, offline, arabic, platform, quality, product. */
+  id: string;
   title: string;
   body: string;
   tools: string[];
 }
 
-export interface WritingTopic {
-  title: string;
-  body: string;
+export interface FaqItem {
+  question: string;
+  answer: string;
 }
 
-export interface Writing {
+/** Short answers to what a recruiter or client asks first. */
+export interface Faq {
   title: string;
   intro: string;
-  topics: WritingTopic[];
+  items: FaqItem[];
+  /** Where to read more. */
   link: { label: string; url: string };
 }

@@ -45,7 +45,7 @@ const localizedContent = z.object({
     role: text,
     location: text,
     positioning: text,
-    facts: z.array(text).min(1),
+    availability: text,
     aboutTitle: text,
     about: z.array(text).min(1),
     principles: z.array(z.object({ title: text, body: text })).min(1),
@@ -79,10 +79,10 @@ const localizedContent = z.object({
   }),
   recognitions: z.array(z.object({ title: text, body: text, year: text, link: link.optional() })).min(1),
   expertise: record(EXPERTISE_IDS, z.object({ title: text, body: text })),
-  writing: z.object({
+  faq: z.object({
     title: text,
     intro: text,
-    topics: z.array(z.object({ title: text, body: text })).min(1),
+    items: z.array(z.object({ question: text, answer: text })).min(3),
     link,
   }),
 });
@@ -137,8 +137,7 @@ export function assertSameShape(
   }
   same('career.milestones', a.career.milestones.length, b.career.milestones.length);
   same('recognitions', a.recognitions.length, b.recognitions.length);
-  same('writing.topics', a.writing.topics.length, b.writing.topics.length);
-  same('profile.facts', a.profile.facts.length, b.profile.facts.length);
+  same('faq.items', a.faq.items.length, b.faq.items.length);
   same('profile.principles', a.profile.principles.length, b.profile.principles.length);
 
   if (problems.length > 0) {

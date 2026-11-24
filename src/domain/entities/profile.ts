@@ -24,8 +24,8 @@ export interface Profile {
   location: string;
   /** The hero sentence: who he is and what he builds. */
   positioning: string;
-  /** Short, factual lines shown beside the hero sentence. */
-  facts: string[];
+  /** One line on what he is open to, shown in the hero badge. */
+  availability: string;
   aboutTitle: string;
   about: string[];
   principles: Principle[];

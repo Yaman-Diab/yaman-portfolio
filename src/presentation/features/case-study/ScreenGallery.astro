@@ -1,6 +1,6 @@
 ---
 import type { Screen } from '@/domain/entities/project';
-import PhoneFrame from '@/presentation/components/PhoneFrame.astro';
+import DeviceFrame from '@/presentation/components/DeviceFrame.astro';
 
 interface Props {
   screens: Screen[];
@@ -17,7 +17,11 @@ const { screens, appName, label } = Astro.props;
       {
         screens.map((screen, index) => (
           <li class="screens__item" data-reveal style={`--i:${index}`}>
-            <PhoneFrame screen={screen} appName={appName} sizes="(min-width: 60rem) 16rem, 62vw" caption />
+            <DeviceFrame screens={[screen]} appName={appName} sizes="(min-width: 60rem) 16rem, 62vw" />
+            <p class="screens__caption">
+              {screen.title}
+              {screen.image && screen.credit && <small>{screen.credit}</small>}
+            </p>
           </li>
         ))
       }
@@ -26,9 +30,22 @@ const { screens, appName, label } = Astro.props;
 </section>
 
 <style>
-  /* The phones stand across the edge between the mist hero and the paper page. */
   .screens {
-    background: linear-gradient(to bottom, var(--mist) 0 48%, var(--bg) 48% 100%);
+    padding-block: var(--space-6) var(--space-8);
+  }
+
+  .screens__caption {
+    display: grid;
+    gap: 0.2rem;
+    margin-block-start: var(--space-4);
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .screens__caption small {
+    color: var(--fg-muted);
+    font-size: var(--text-xs);
+    font-weight: 400;
   }
 
   .screens__track {

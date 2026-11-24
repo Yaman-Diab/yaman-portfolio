@@ -2,8 +2,11 @@
 import { routes } from '@/app/routes';
 import type { Locale } from '@/domain/entities/locale';
 import type { Project } from '@/domain/entities/project';
-import PhoneFrame from '@/presentation/components/PhoneFrame.astro';
+import DeviceFrame from '@/presentation/components/DeviceFrame.astro';
+import Icon from '@/presentation/components/Icon.astro';
+import RollNumber from '@/presentation/components/RollNumber.astro';
 import StatusPill from '@/presentation/components/StatusPill.astro';
+import { brandStyle, splashOf } from '@/presentation/features/case-study/splash';
 import { useUi } from '@/presentation/i18n/ui';
 
 interface Props {
@@ -13,214 +16,387 @@ interface Props {
 
 const { locale, projects } = Astro.props;
 const t = useUi(locale);
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<section class="section theme-paper" id="work">
+<section class="section theme-paper work" id="work" aria-labelledby="work-title" data-expand>
   <div class="wrap">
     <header class="work__head">
-      <h2 class="section__title">{t.work.title}</h2>
-      <p class="section__intro">{t.work.intro}</p>
+      <div class="work__titles">
+        <p class="eyebrow"><span>02</span> / {t.nav.work}</p>
+        <h2 class="work__title" id="work-title">{t.work.title}<span class="work__dot">.</span></h2>
+        <p class="work__script">{t.work.script}</p>
+      </div>
+      <div class="work__side">
+        <p class="work__intro">{t.work.intro}</p>
+      </div>
     </header>
 
-    <ul class="work__list">
+    <div class="work__list" data-scroll-rows>
+    <span class="work__progress" aria-hidden="true"><span></span><i></i></span>
+    <ol class="work__rows">
       {
-        projects.map((project) => (
-          <li data-inview>
+        projects.map((project, i) => (
+          <li>
             <a
-              class="project theme-tint"
+              class="row"
               href={routes.project(locale, project.slug)}
-              aria-label={`${project.name}: ${project.tagline}. ${t.work.open}`}
+              style={brandStyle(project)}
+              data-splash={JSON.stringify(splashOf(project))}
             >
-              <div class="project__text">
-                <h3 class="project__name" style={`view-transition-name: project-${project.slug}`}>
-                  {project.name}
-                </h3>
-                <p class="project__tagline">{project.tagline}</p>
-                <p class="project__teaser">{project.teaser}</p>
-                <p class="project__meta">
-                  <StatusPill status={project.status} label={project.statusLabel} />
-                  <span class="project__year">{project.year}</span>
-                </p>
-                <span class="project__cta">
-                  {t.work.open}
-                  <span class="project__arrow" aria-hidden="true" />
-                </span>
-              </div>
+              <span class="row__accent" aria-hidden="true"></span>
+              <span class="row__num">
+                <RollNumber value={pad(i + 1)} />
+              </span>
 
-              <div class="project__phones" aria-hidden="true">
+              <span class="row__main">
+                <span class="row__kicker">
+                  <StatusPill status={project.status} label={project.statusLabel} />
+                  <span dir="ltr">{project.year}</span>
+                </span>
+                <span class="row__name">{project.name}</span>
+                <span class="row__tagline">{project.tagline}</span>
+              </span>
+
+              <span class="row__teaser">{project.teaser}</span>
+
+              <span class="row__shots" aria-hidden="true">
                 {project.screens.map((screen) => (
-                  <PhoneFrame
-                    screen={screen}
+                  <DeviceFrame
+                    screens={[screen]}
                     appName={project.name}
-                    sizes="(min-width: 60rem) 12rem, 28vw"
+                    sizes="(min-width: 60rem) 6rem, 22vw"
                     decorative
                   />
                 ))}
-              </div>
+              </span>
+
+              <span class="row__go" aria-hidden="true">
+                <Icon name="arrowUpRight" flip />
+              </span>
+              <span class="visually-hidden">{t.work.open}</span>
             </a>
           </li>
         ))
       }
-    </ul>
+    </ol>
+    </div>
   </div>
 </section>
 
 <style>
+  /* Grows out of the hero: starts as an inset card on navy and widens to the
+     full page as it scrolls in (site.ts sets --inset and --round). */
+  .work {
+    clip-path: inset(0 var(--inset, 0px) round var(--round, 0px) var(--round, 0px) 0 0);
+  }
+
+  /* ---------- Heading block, Stack-style ---------- */
+
   .work__head {
     display: grid;
-    gap: var(--space-4);
-    margin-block-end: var(--space-7);
-  }
-
-  .work__list {
-    display: grid;
     gap: var(--space-6);
+    margin-block-end: var(--space-8);
   }
 
-  /* ---------- One project ---------- */
-
-  .project {
-    --pad: clamp(1.5rem, 1rem + 2.6vw, 3.5rem);
-    display: grid;
-    gap: var(--space-6);
-    padding: var(--pad) var(--pad) 0;
-    overflow: clip;
-    border-radius: var(--radius-lg);
-    text-decoration: none;
-    transition: background-color var(--dur) var(--ease-out);
-  }
-
-  .project:hover,
-  .project:focus-visible {
-    background: var(--mist);
-  }
-
-  .project__text {
-    display: grid;
-    gap: var(--space-3);
-    align-content: center;
-    justify-items: start;
-  }
-
-  .project__name {
-    font-size: var(--text-3xl);
-    font-weight: 650;
+  .work__title {
+    margin-block-start: var(--space-3);
+    font-size: clamp(3rem, 1rem + 9vw, 9rem);
+    font-weight: 800;
+    line-height: 0.95;
     letter-spacing: -0.03em;
   }
 
-  [dir='rtl'] .project__name {
-    font-size: calc(var(--text-3xl) * 0.9);
+  :global([dir='rtl']) .work__title {
+    line-height: 1.25;
     letter-spacing: 0;
   }
 
-  .project__tagline {
+  .work__dot {
+    color: var(--red);
+  }
+
+  /* A second line in the same face at its lightest weight: contrast by weight, not by a new font. */
+  .work__script {
+    margin-block-start: 0.2em;
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 1rem + 2.6vw, 3.25rem);
+    font-weight: 200;
+    line-height: 1.15;
+    color: var(--blue);
+    width: fit-content;
+  }
+
+  :global([dir='rtl']) .work__script {
+    font-weight: 300;
+    margin-block-start: 0.5em;
+    font-size: clamp(1.6rem, 1rem + 2vw, 2.6rem);
+    line-height: 1.6;
+  }
+
+  .work__side {
+    display: grid;
+    gap: var(--space-5);
+    align-content: end;
+  }
+
+  .work__intro {
+    max-width: 32ch;
+    color: var(--fg-muted);
     font-size: var(--text-lg);
-    font-weight: 600;
     line-height: var(--leading-snug);
   }
 
-  .project__teaser {
-    max-width: 38ch;
-    color: var(--fg-muted);
+  @media (min-width: 60rem) {
+    .work__head {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      align-items: end;
+    }
   }
 
-  .project__meta {
+  /* ---------- Rows ---------- */
+
+  /*
+   * Like a stack of layers: a progress line runs down the list as it scrolls,
+   * and a row takes its app's colour only under the pointer (site.ts sets --progress).
+   */
+  .work__list {
+    position: relative;
+  }
+
+  .work__rows {
+    border-block-start: 1px solid var(--fg);
+  }
+
+  .work__progress {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(-1 * var(--space-5));
+    width: 2px;
+    background: var(--rule);
+  }
+
+  .work__progress span {
+    position: absolute;
+    inset: 0;
+    background: var(--red);
+    transform: scaleY(var(--progress, 0));
+    transform-origin: top;
+  }
+
+  .work__progress i {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--progress, 0) * 100%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--red) 20%, transparent);
+    translate: -50% -50%;
+  }
+
+  .row__accent {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -1px;
+    height: 2px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: var(--from, left);
+    transition: transform 900ms var(--ease-out);
+  }
+
+  :global([dir='rtl']) .row__accent {
+    --from: right;
+  }
+
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'num go'
+      'main main'
+      'teaser teaser';
+    gap: var(--space-3) var(--space-5);
+    align-items: center;
+    padding-block: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    border-block-end: 1px solid var(--rule);
+    text-decoration: none;
+    isolation: isolate;
+  }
+
+  /* The app's colour sweeps in from the reading edge as the pointer arrives. */
+  .row::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(-1 * var(--space-4));
+    z-index: -1;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(circle at 80% 120%, color-mix(in srgb, var(--brand) 28%, transparent), transparent 60%),
+      color-mix(in srgb, var(--brand) 9%, var(--paper));
+    transform: scaleX(0);
+    transform-origin: var(--from, left);
+    transition: transform 700ms var(--ease-out);
+  }
+
+  :global([dir='rtl']) .row::before {
+    --from: right;
+  }
+
+  .row:hover::before,
+  .row:focus-visible::before {
+    transform: scaleX(1);
+  }
+
+  .row__num {
+    grid-area: num;
+    align-self: start;
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 1.5rem + 4.5vw, 6rem);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--fg);
+    transition: color var(--dur) ease;
+  }
+
+  .row:hover .row__num{
+    color: var(--brand-ink);
+  }
+
+  .row__main {
+    grid-area: main;
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .row__kicker {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-2) var(--space-5);
-    margin-block-start: var(--space-2);
-  }
-
-  .project__year {
+    gap: var(--space-3);
     color: var(--fg-muted);
-    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
   }
 
-  .project__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6em;
-    margin-block-start: var(--space-3);
-    color: var(--accent);
-    font-weight: 600;
+  .row__name {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 1.1rem + 1.8vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
   }
 
-  /* A chevron pointing the way the page reads. */
-  .project__arrow {
-    width: 0.5em;
-    height: 0.5em;
-    border-block-start: 2px solid currentColor;
-    border-inline-end: 2px solid currentColor;
-    transform: rotate(calc(var(--dir) * 45deg));
-    transition: translate var(--dur) var(--ease-out);
+  .row__tagline {
+    color: var(--fg-muted);
   }
 
-  .project:hover .project__arrow,
-  .project:focus-visible .project__arrow {
-    translate: calc(var(--dir) * 0.3rem) 0;
+  .row__teaser {
+    grid-area: teaser;
+    max-width: 40ch;
+    font-size: var(--text-sm);
+    line-height: 1.5;
   }
 
-  /* ---------- Phones ----------
-   * Three screens stand at the bottom edge of the panel and are cut off by it.
-   * They rise when the panel scrolls into view, and fan out on hover.
-   */
-
-  .project__phones {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 4%;
-    padding-inline: 2%;
+  .row__shots {
+    display: none;
   }
 
-  .project__phones > :global(.phone) {
-    flex: 0 0 29%;
-    translate: 0 16%;
+  .row__go {
+    grid-area: go;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
     transition:
-      translate var(--dur-slow) var(--ease-out),
-      rotate var(--dur-slow) var(--ease-out);
+      background-color var(--dur) ease,
+      color var(--dur) ease,
+      border-color var(--dur) ease,
+      rotate var(--dur) var(--ease-out);
   }
 
-  .project__phones > :global(.phone:nth-child(2)) {
-    translate: 0 7%;
-  }
-
-  :global(.js) li:not(.is-inview) .project__phones > :global(.phone) {
-    translate: 0 45%;
-  }
-
-  @media (hover: hover) {
-    .project:hover .project__phones > :global(.phone:nth-child(1)) {
-      translate: calc(var(--dir) * -6%) 11%;
-      rotate: calc(var(--dir) * -3deg);
-    }
-
-    .project:hover .project__phones > :global(.phone:nth-child(2)) {
-      translate: 0 2%;
-    }
-
-    .project:hover .project__phones > :global(.phone:nth-child(3)) {
-      translate: calc(var(--dir) * 6%) 11%;
-      rotate: calc(var(--dir) * 3deg);
-    }
+  .row:hover .row__go,
+  .row:focus-visible .row__go {
+    border-color: var(--brand-deep);
+    background: var(--brand-deep);
+    color: var(--on-brand);
+    /* The arrow is mirrored in Arabic, so it turns the other way to point forward. */
+    rotate: calc(var(--dir) * 45deg);
   }
 
   @media (min-width: 60rem) {
-    .project {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      align-items: end;
-      column-gap: var(--space-7);
+    .row {
+      grid-template-columns: 8rem minmax(0, 1.2fr) minmax(0, 1fr) 19rem 3.25rem;
+      grid-template-areas: 'num main teaser shots go';
+      gap: var(--space-6);
     }
 
-    .project__text {
-      align-self: center;
-      padding-block-end: var(--pad);
+    .row__shots {
+      grid-area: shots;
     }
 
-    /* Every other project puts its phones first, for rhythm down the page. */
-    .work__list > li:nth-child(even) .project__text {
-      order: 2;
+    /* Three phones stood in perspective, with a soft shadow on the ground. */
+    .row__shots {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      height: 9.5rem;
+      perspective: 900px;
+    }
+
+    .row__shots::after {
+      content: '';
+      position: absolute;
+      inset-inline: 12%;
+      inset-block-end: -0.6rem;
+      height: 1.2rem;
+      border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(11, 33, 64, 0.35), transparent);
+      filter: blur(4px);
+      z-index: -1;
+    }
+
+    .row__shots > :global(.device) {
+      flex: 0 0 5.25rem;
+      margin-inline: -0.9rem;
+      transform: rotateY(calc(var(--dir) * -22deg)) rotateX(6deg);
+      transition:
+        transform 900ms var(--ease-out),
+        translate 900ms var(--ease-out);
+    }
+
+    .row__shots > :global(.device:nth-child(1)) {
+      translate: 0 6%;
+    }
+
+    .row__shots > :global(.device:nth-child(2)) {
+      z-index: 1;
+      translate: 0 -2%;
+    }
+
+    .row__shots > :global(.device:nth-child(3)) {
+      z-index: 2;
+      translate: 0 -10%;
+    }
+
+    .row:hover .row__shots > :global(.device){
+      transform: rotateY(0deg) rotateX(0deg);
+      margin-inline: 0.15rem;
+    }
+
+    .row:hover .row__shots > :global(.device:nth-child(2)){
+      translate: 0 -12%;
+    }
+
+    .row:hover .row__shots > :global(.device:nth-child(1)),
+    .row:hover .row__shots > :global(.device:nth-child(3)){
+      translate: 0 0;
     }
   }
 </style>

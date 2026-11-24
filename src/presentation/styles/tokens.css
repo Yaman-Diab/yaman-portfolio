@@ -36,6 +36,14 @@
   --line-strong: #b9c6d8;
   --line-dark: #2e4c74;
 
+  /*
+   * Signal red: one hot colour against the cool blues, from the red of the
+   * logo's master file. Used small and on purpose: full stops of big titles,
+   * section numbers, a few glyphs, progress. Never for body text.
+   */
+  --red: #e8323c;
+  --red-on-dark: #ff5c63;
+
   /* Semantic states */
   --ok-on-light: #17704a;
   --ok-on-dark: #6fd3a8;
@@ -43,7 +51,8 @@
   --danger-on-dark: #ff9196;
 
   /* Type */
-  --font-display: 'Bricolage Grotesque', 'Fustat', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
+  --font-display: 'Unbounded', 'Alexandria', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   --font-body: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
 
   --text-xs: 0.8125rem;
@@ -72,7 +81,7 @@
   --section-pad: clamp(4rem, 2.5rem + 6.5vw, 8.5rem);
   --gutter: clamp(1.25rem, 0.4rem + 3.6vw, 3.5rem);
   --content: 76rem;
-  --header-height: 4rem;
+  --header-height: 4.5rem;
 
   /* Shape */
   --radius-sm: 6px;
@@ -120,6 +129,7 @@
   --button-hover: var(--blue-deep);
   --focus: var(--blue);
   --device: var(--navy);
+  --signal: var(--red);
 }
 
 .theme-paper {
@@ -157,6 +167,7 @@
   --button-hover: var(--white);
   --focus: var(--blue-light);
   --device: var(--navy-deep);
+  --signal: var(--red-on-dark);
 }
 
 .theme-paper,

@@ -1,0 +1,63 @@
+---
+/**
+ * A number whose digits roll up into place when it scrolls into view, each
+ * column a beat after the one before. Pure CSS, driven by `is-inview`
+ * (site.ts adds it). The real number is in the accessible text.
+ */
+interface Props {
+  value: string;
+  class?: string;
+}
+
+const { value, class: className } = Astro.props;
+const chars = [...value];
+---
+
+<span class:list={['roll', className]} data-inview dir="ltr">
+  <span class="visually-hidden">{value}</span>
+  {
+    chars.map((char, i) =>
+      /\d/.test(char) ? (
+        <span class="roll__col" style={`--d:${char};--c:${i}`} aria-hidden="true">
+          {Array.from({ length: 10 }, (_, n) => (
+            <span>{n}</span>
+          ))}
+        </span>
+      ) : (
+        <span aria-hidden="true">{char}</span>
+      ),
+    )
+  }
+</span>
+
+<style>
+  .roll {
+    display: inline-flex;
+    height: 1em;
+    overflow: hidden;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .roll__col {
+    display: flex;
+    flex-direction: column;
+    transform: translateY(calc(var(--d) * -1em));
+  }
+
+  .roll__col > span {
+    display: block;
+    height: 1em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .roll:not(.is-inview) .roll__col {
+      transform: translateY(0);
+    }
+
+    .roll__col {
+      transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: calc(var(--c) * 120ms + 100ms);
+    }
+  }
+</style>

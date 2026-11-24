@@ -1,0 +1,65 @@
+---
+/**
+ * The language switch: one small pill that names the other language in its
+ * own script ("English" on the Arabic page, "العربية" on the English one),
+ * with a globe. One link to the same page in the other language.
+ */
+import { otherLocale, type Locale } from '@/domain/entities/locale';
+import Icon from '@/presentation/components/Icon.astro';
+import { useUi } from '@/presentation/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  href: string;
+  class?: string;
+}
+
+const { locale, href, class: className } = Astro.props;
+const t = useUi(locale);
+const other = otherLocale(locale);
+---
+
+<a
+  class:list={['lang-toggle', className]}
+  href={href}
+  hreflang={other}
+  lang={other}
+  aria-label={t.switchLanguageLabel}
+>
+  <Icon name="globe" class="lang-toggle__icon" />
+  <span>{t.switchLanguage}</span>
+</a>
+
+<style>
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.5rem;
+    padding: 0.3rem 0.95rem;
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      border-color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  .lang-toggle:hover {
+    border-color: currentColor;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .lang-toggle[lang='ar'] {
+    font-family: 'IBM Plex Sans Arabic', var(--font-body);
+  }
+
+  .lang-toggle :global(.lang-toggle__icon) {
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.8;
+  }
+</style>

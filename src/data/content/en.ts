@@ -7,12 +7,8 @@ export const en: LocalizedContent = {
     role: 'Flutter Developer',
     location: 'Damascus, Syria',
     positioning:
-      'Flutter developer. I build Arabic‑first, offline‑first mobile apps, and the architecture, tests and documentation that keep them maintainable.',
-    facts: [
-      'Two years building Flutter apps for clients',
-      'Wafir is live on Google Play with 1K+ downloads',
-      'Open to mid-level roles in Syria and abroad',
-    ],
+      'I build Arabic‑first, offline‑first mobile apps, and the architecture, tests and documentation that keep them maintainable.',
+    availability: 'Open to mid-level roles in Syria and abroad',
     aboutTitle: 'An app starts before the first line of code.',
     about: [
       'I am a Flutter developer based in Damascus. For two years I have built mobile apps for clients from start to finish: requirements, architecture, the app itself, its tests and the store release.',
@@ -427,25 +423,43 @@ export const en: LocalizedContent = {
     },
   },
 
-  writing: {
-    title: 'Notes on building apps',
-    intro: 'I write on LinkedIn, in Arabic, about what I learn while building.',
-    topics: [
+  faq: {
+    title: 'Questions people ask',
+    intro: 'Short answers on how I work. I write at more length on LinkedIn about what I learn while building.',
+    items: [
       {
-        title: 'The flow behind “Add to cart”',
-        body: 'Guest carts, a sign-in halfway through, changed prices and failed requests in a delivery app.',
+        question: 'What kind of role are you looking for?',
+        answer: 'I am open to mid-level Flutter roles in Syria and abroad.',
       },
       {
-        title: 'Push notifications are a whole flow',
-        body: 'Foreground, background and closed states, token refresh and in-app banners.',
+        question: 'Do you work remotely?',
+        answer:
+          'Yes. I have worked remotely for two years, usually as the only mobile developer on the project, alongside the client\u2019s backend team until the app ships.',
       },
       {
-        title: 'Five signs a networking layer needs a rethink',
-        body: 'Repeated token logic, scattered error handling and sessions that expire in ten places.',
+        question: 'Do you build the backend too?',
+        answer:
+          'I focus on the mobile app and work with the client\u2019s backend team. When a project needs it, I write the API contracts and a guide for the backend developers, as on Engleazia.',
       },
       {
-        title: 'Automated testing in Flutter',
-        body: 'Unit, widget and integration tests, and where each one earns its place.',
+        question: 'How do you handle Arabic and English?',
+        answer:
+          'Right-to-left is where my layouts begin, and I test every screen in both directions. Every app I have built ships in full Arabic and English.',
+      },
+      {
+        question: 'How do you keep the code healthy?',
+        answer:
+          'Feature-first Clean Architecture, dependencies that point one way, and unit, Cubit, widget and layout tests in both directions, run on every push.',
+      },
+      {
+        question: 'Can the app work offline?',
+        answer:
+          'Yes. In Engleazia the encrypted lessons work offline, and answers wait in a queue and are counted exactly once when the connection returns.',
+      },
+      {
+        question: 'Where can I read more about how you think?',
+        answer:
+          'I write on LinkedIn, in Arabic, about guest carts in delivery apps, notifications, organising the network layer, and automated testing in Flutter.',
       },
     ],
     link: { label: 'Read on LinkedIn', url: LINKS.linkedinPosts },

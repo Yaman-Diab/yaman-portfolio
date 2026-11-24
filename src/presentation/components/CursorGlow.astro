@@ -49,6 +49,10 @@
         }
         targetX = event.clientX;
         targetY = event.clientY;
+        // Only over light ground: on dark sections the light fades out.
+        const under = event.target instanceof Element ? event.target : null;
+        const dark = Boolean(under?.closest('.theme-dark, .site-footer, .curtain, .site-header'));
+        glow.classList.toggle('is-dimmed', dark);
         if (!visible) {
           // Appear where the pointer is instead of sliding in from a corner.
           x = targetX;
@@ -97,6 +101,10 @@
 
   .cursor-glow.is-visible {
     opacity: 1;
+  }
+
+  .cursor-glow.is-visible.is-dimmed {
+    opacity: 0;
   }
 
   /* Touch screens and reduced motion never show it, even if the script misjudges. */

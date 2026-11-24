@@ -115,21 +115,33 @@ async function socialImage() {
 
 const pick = ({ input }) => ({ input });
 
-/** The site mark: a mist nuqta on navy. */
-function iconSvg(size) {
-  const half = size / 2;
-  const side = size * 0.36;
-  return Buffer.from(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
-      <rect width="100%" height="100%" rx="${size * 0.22}" fill="${COLOR.navy}"/>
-      <rect x="${-side / 2}" y="${-side / 2}" width="${side}" height="${side}" fill="${COLOR.mist}"
-        transform="translate(${half} ${half}) rotate(45)"/>
-    </svg>`);
+/** The site mark (src/presentation/components/LogoMark.astro): white bar, light-blue bubble, on navy. */
+const MARK = {
+  viewBox: '192 296 218 194',
+  bubble:
+    'M288.89,369.72c-.03,6.64-.05,13.29-.08,19.93l-17.84-19.93c-20.76,0-41.52,0-62.28,0-8.31,0-15.04-6.74-15.04-15.04v-42.42c0-8.31,6.74-15.04,15.04-15.04h65.15c8.31,0,15.04,6.74,15.04,15.04v57.47Z',
+  bar: 'M312.25,488.7h-67.98c-2.53,0-4.17-2.66-3.03-4.92l93.33-184.71c.58-1.14,1.75-1.86,3.03-1.86h67.98c2.53,0,4.17,2.66,3.03,4.92l-93.33,184.71c-.58,1.14-1.75,1.86-3.03,1.86Z',
+};
+
+function iconMarkup(size) {
+  const w = size * 0.64;
+  const h = (w * 194) / 218;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  <rect width="100%" height="100%" rx="${size * 0.22}" fill="${COLOR.navy}"/>
+  <svg x="${(size - w) / 2}" y="${(size - h) / 2}" width="${w}" height="${h}" viewBox="${MARK.viewBox}">
+    <path fill="${COLOR.blueLight}" d="${MARK.bubble}"/>
+    <path fill="#ffffff" d="${MARK.bar}"/>
+  </svg>
+</svg>
+`;
 }
+
+const iconSvg = (size) => Buffer.from(iconMarkup(size));
 
 await mkdir(file('public'), { recursive: true });
 await socialImage();
+await writeFile(file("public/favicon.svg"), iconMarkup(64));
 await sharp(iconSvg(64)).png().toFile(file('public/favicon.png'));
 await sharp(iconSvg(180)).flatten({ background: COLOR.navy }).png().toFile(file('public/apple-touch-icon.png'));
 
-console.log('Wrote public/og.png, public/favicon.png and public/apple-touch-icon.png');
+console.log('Wrote public/og.png, public/favicon.svg, public/favicon.png and public/apple-touch-icon.png');

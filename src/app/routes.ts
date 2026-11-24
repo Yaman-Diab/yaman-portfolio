@@ -13,6 +13,7 @@ export const routes = {
   home: (locale: Locale) => `${BASE}${localePrefix(locale)}`,
   section: (locale: Locale, id: string) => `${BASE}${localePrefix(locale)}#${id}`,
   project: (locale: Locale, slug: ProjectSlug) => `${BASE}${localePrefix(locale)}projects/${slug}/`,
+  lab: (locale: Locale) => `${BASE}${localePrefix(locale)}lab/`,
   asset: (path: string) => `${BASE}${path.replace(/^\//, '')}`,
 };
 

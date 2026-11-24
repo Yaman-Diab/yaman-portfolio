@@ -240,44 +240,7 @@ button {
   translate: 0 0;
 }
 
-/* ---------- Page transitions ---------- */
-
-@view-transition {
-  navigation: auto;
-}
-
-::view-transition {
-  background: var(--navy-deep);
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 300ms;
-  animation-timing-function: var(--ease-out);
-}
-
-/* Switching language turns the page over, like a sheet read from the other side. */
-html:active-view-transition-type(language)::view-transition-old(root) {
-  animation: 240ms var(--ease-in) both page-turn-out;
-}
-
-html:active-view-transition-type(language)::view-transition-new(root) {
-  animation: 460ms var(--ease-out) 240ms both page-turn-in;
-}
-
-@keyframes page-turn-out {
-  to {
-    transform: perspective(1800px) rotateY(calc(var(--dir) * -88deg));
-    opacity: 0.2;
-  }
-}
-
-@keyframes page-turn-in {
-  from {
-    transform: perspective(1800px) rotateY(calc(var(--dir) * -88deg));
-    opacity: 0.2;
-  }
-}
+/* Page transitions: the logo curtain, see components/PageCurtain.astro. */
 
 /* ---------- Reduced motion ---------- */
 
@@ -300,8 +263,93 @@ html:active-view-transition-type(language)::view-transition-new(root) {
     opacity: 1;
     translate: 0 0;
   }
+}
 
-  @view-transition {
-    navigation: none;
-  }
+/* ---------- Fixed header offset ----------
+ * The header floats over the page, so content starts below it.
+ * A page that wants its first section under the header (the home hero)
+ * pulls it back up with a negative margin.
+ */
+main {
+  position: relative;
+  z-index: 1;
+  padding-block-start: var(--header-height);
+  /* Navy behind the sections: shows only where a section is inset (the work block grows out of it). */
+  background: var(--navy-deep);
+}
+
+/* ---------- Pill buttons ----------
+ * Rounded calls to action. With `data-magnetic` they lean toward the pointer
+ * (scripts/magnetic.ts); the transition below is what springs them back.
+ */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3.25rem;
+  padding: 0.8rem 1.6rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+
+.pill--solid {
+  background: var(--white);
+  color: var(--navy);
+}
+
+.pill--solid:hover {
+  background: var(--blue-light);
+}
+
+.pill--line {
+  border-color: color-mix(in srgb, currentColor 35%, transparent);
+  color: inherit;
+}
+
+.pill--line:hover {
+  border-color: currentColor;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+/* Magnetic elements are moved by script every frame; no CSS transition on translate, or it would lag. */
+.is-magnetic [data-magnetic-label] {
+  will-change: translate;
+}
+
+.is-magnetic [data-magnetic-label] {
+  display: inline-block;
+}
+
+/* ---------- Eyebrow: "02 / Work" above a section title ---------- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.eyebrow span {
+  color: var(--signal, var(--red));
+  font-weight: 700;
+}
+
+[dir='rtl'] .eyebrow {
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+[dir='rtl'] .eyebrow span {
+  font-family: var(--font-mono);
 }

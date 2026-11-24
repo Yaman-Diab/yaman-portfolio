@@ -2,6 +2,8 @@
 import { routes } from '@/app/routes';
 import type { Locale } from '@/domain/entities/locale';
 import type { Profile } from '@/domain/entities/profile';
+import Icon from '@/presentation/components/Icon.astro';
+import { MARK_SHAPE } from '@/presentation/components/mark';
 import { useUi } from '@/presentation/i18n/ui';
 
 interface Props {
@@ -12,256 +14,320 @@ interface Props {
 const { locale, profile } = Astro.props;
 const t = useUi(locale);
 
-// The page's own script leads; the other script answers from the far side.
-const names = {
-  primary: locale === 'ar' ? { text: profile.nameArabic, lang: 'ar' } : { text: profile.nameLatin, lang: 'en' },
-  secondary: locale === 'ar' ? { text: profile.nameLatin, lang: 'en' } : { text: profile.nameArabic, lang: 'ar' },
-};
 ---
 
-<section class="hero theme-paper">
-  <div class="wrap">
-    <h1 class="lockup">
-      <span class="lockup__name lockup__name--primary" lang={names.primary.lang}>{names.primary.text}</span>
-      <span class="lockup__rule" aria-hidden="true">
-        <span class="lockup__runner"><span class="nuqta"></span></span>
-      </span>
-      <span
-        class="lockup__name lockup__name--secondary"
-        lang={names.secondary.lang}
-        dir={names.secondary.lang === 'ar' ? 'rtl' : 'ltr'}
-        aria-hidden="true">{names.secondary.text}</span
-      >
+<section class="hero theme-dark" aria-labelledby="hero-title">
+  <!-- Yaman's mark, drawn in code symbols that scatter from the pointer (scripts/glyph-field.ts). -->
+  <canvas class="hero__field" data-glyph-field data-float data-align="end" data-fill="0.72" data-shape={JSON.stringify(MARK_SHAPE)} aria-hidden="true"></canvas>
+  <div class="hero__shade" aria-hidden="true"></div>
+
+  <div class="wrap hero__inner">
+    <p class="hero__eyebrow hero__rise" style="--i:0">
+      <span class="hero__index">01</span>
+      <span class="hero__slash">/</span>
+      <span>{profile.role}</span>
+      <span class="hero__badge"><span class="hero__pulse" aria-hidden="true"></span>{profile.availability}</span>
+    </p>
+
+    <h1 class="hero__title" id="hero-title">
+      <span class="hero__name hero__rise" style="--i:1">{profile.name}<span class="hero__dot">.</span></span>
+      <span class="hero__script hero__rise" style="--i:2">{t.hero.script}</span>
     </h1>
 
-    <div class="hero__body">
-      <div class="hero__lead">
-        <p class="hero__positioning">{profile.positioning}</p>
-        <div class="hero__actions">
-          <a class="button button--primary" href={routes.section(locale, 'work')}>{t.hero.primaryAction}</a>
-          <a class="button button--ghost" href={routes.section(locale, 'contact')}>{t.hero.secondaryAction}</a>
-        </div>
-      </div>
+    <p class="hero__lead hero__rise" style="--i:3">{profile.positioning}</p>
 
-      <ul class="hero__facts">
-        {
-          profile.facts.map((fact) => (
-            <li>
-              <span class="nuqta" aria-hidden="true" />
-              <span>{fact}</span>
-            </li>
-          ))
-        }
-      </ul>
+    <div class="hero__actions hero__rise" style="--i:4">
+      <a class="pill pill--solid" href={routes.section(locale, 'work')} data-magnetic>
+        <span data-magnetic-label>{t.hero.primaryAction}</span>
+        <Icon name="arrowDown" />
+      </a>
+      <a class="pill pill--line" href={routes.section(locale, 'contact')} data-magnetic>
+        <span data-magnetic-label>{t.hero.secondaryAction}</span>
+      </a>
+      <span class="hero__socials">
+        <a class="hero__social" href={profile.contact.github} rel="me noopener" aria-label="GitHub" data-magnetic="0.5">
+          <Icon name="github" />
+        </a>
+        <a class="hero__social" href={profile.contact.linkedin} rel="me noopener" aria-label="LinkedIn" data-magnetic="0.5">
+          <Icon name="linkedin" />
+        </a>
+      </span>
     </div>
   </div>
+
 </section>
 
 <style>
   .hero {
-    padding-block: clamp(2.5rem, 1.5rem + 5vw, 6rem) clamp(3.5rem, 2rem + 6vw, 7.5rem);
-    overflow: clip;
-  }
-
-  /* ---------- Name lockup: two scripts, two directions, one line ---------- */
-
-  .lockup {
-    display: grid;
-    font-weight: 700;
-    line-height: 0.92;
-  }
-
-  .lockup__name {
-    display: block;
-    width: fit-content;
-    padding-block: 0.08em;
-    white-space: nowrap;
-  }
-
-  .lockup__name--primary {
-    justify-self: start;
-    font-size: var(--text-hero);
-    letter-spacing: -0.04em;
-  }
-
-  .lockup__name--secondary {
-    justify-self: end;
-    font-size: calc(var(--text-hero) * 0.46);
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: -0.03em;
-  }
-
-  /* Arabic sits taller and deeper than Latin, and must not be tracked. */
-  .lockup__name[lang='ar'] {
-    line-height: 1.35;
-    letter-spacing: 0;
-    padding-block: 0;
-  }
-
-  .lockup__name--primary[lang='ar'] {
-    font-size: calc(var(--text-hero) * 0.86);
-  }
-
-  .lockup__name--secondary[lang='ar'] {
-    font-size: calc(var(--text-hero) * 0.42);
-  }
-
-  .lockup__rule {
     position: relative;
-    display: block;
-    height: 2px;
-    margin-block: clamp(0.5rem, 1.4vw, 1.25rem);
-    background: var(--line-strong);
-    transform-origin: left center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    /* The hero runs under the floating header. */
+    margin-block-start: calc(-1 * var(--header-height));
+    padding-block: calc(var(--header-height) + clamp(2.5rem, 1.5rem + 5vw, 6rem)) clamp(4rem, 3rem + 4vw, 7rem);
+    background:
+      radial-gradient(ellipse 70% 60% at 85% 35%, color-mix(in srgb, var(--blue) 22%, transparent), transparent 70%),
+      var(--navy-deep);
+    overflow: clip;
+    isolation: isolate;
   }
 
-  [dir='rtl'] .lockup__rule {
-    transform-origin: right center;
+  :global([dir='rtl']) .hero {
+    background:
+      radial-gradient(ellipse 70% 60% at 15% 35%, color-mix(in srgb, var(--blue) 22%, transparent), transparent 70%),
+      var(--navy-deep);
   }
 
-  /* A nuqta travels the line between the two names, there and back. */
-  .lockup__runner {
+  .hero__field {
     position: absolute;
     inset: 0;
+    z-index: -1;
+    display: block;
+  }
+
+  /* On a phone the mark sits behind the text, so it steps back. */
+  @media (max-width: 45rem) {
+    .hero__field {
+      opacity: 0.4;
+    }
+  }
+
+  /* Film grain and a fade under the copy, so text always reads over the glyphs. */
+  .hero__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      calc(var(--dir) * 90deg),
+      color-mix(in srgb, var(--navy-deep) 80%, transparent) 0%,
+      color-mix(in srgb, var(--navy-deep) 30%, transparent) 45%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .hero__inner {
+    flex: 1;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .hero__inner a,
+  .hero__inner .hero__badge {
+    pointer-events: auto;
+  }
+
+  /* ---------- Copy ---------- */
+
+  .hero__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    color: var(--accent);
-    font-size: clamp(1rem, 0.7rem + 1vw, 1.5rem);
+    gap: 0.5rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mist);
   }
 
-  /* ---------- Body ---------- */
-
-  .hero__body {
-    display: grid;
-    gap: var(--space-7);
-    margin-block-start: clamp(2rem, 1rem + 4vw, 4.5rem);
+  :global([dir='rtl']) .hero__eyebrow {
+    letter-spacing: 0.02em;
+    font-family: var(--font-body);
+    font-weight: 600;
   }
 
-  .hero__positioning {
-    max-width: 32ch;
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
+  .hero__index {
+    font-family: var(--font-mono);
+    color: var(--red-on-dark);
+    font-weight: 700;
+  }
+
+  .hero__slash {
+    opacity: 0.4;
+  }
+
+  .hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-inline-start: 0.5rem;
+    padding: 0.3rem 0.8rem 0.3rem 0.65rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 999px;
+    color: var(--navy-text);
+    font-family: var(--font-body);
+    font-size: 0.75rem;
     font-weight: 500;
-    line-height: var(--leading-snug);
-    letter-spacing: -0.01em;
-    text-wrap: balance;
+    letter-spacing: 0;
+    text-transform: none;
   }
 
-  [dir='rtl'] .hero__positioning {
+  .hero__pulse {
+    position: relative;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--ok-on-dark);
+  }
+
+  .hero__pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: pulse 2s ease-out infinite;
+  }
+
+  .hero__title {
+    display: grid;
+    margin-block-start: clamp(1.25rem, 0.8rem + 2vw, 2.25rem);
+  }
+
+  .hero__name {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 0.8rem + 8vw, 8.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  :global([dir='rtl']) .hero__name {
+    font-size: clamp(3rem, 1rem + 9vw, 9.5rem);
+    font-weight: 800;
+    line-height: 1.2;
     letter-spacing: 0;
+  }
+
+  .hero__dot {
+    color: var(--red-on-dark);
+  }
+
+  /* The handwritten line: a person, not a template. */
+  /* A second line in the same face at its lightest weight: contrast by weight, not by a new font. */
+  .hero__script {
+    margin-block-start: 0.1em;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 1rem + 5.4vw, 6rem);
+    font-weight: 200;
+    line-height: 1.05;
+    color: var(--blue-light);
+    width: fit-content;
+  }
+
+  :global([dir='rtl']) .hero__script {
+    font-weight: 300;
+    font-size: clamp(2rem, 1rem + 4.2vw, 4.75rem);
+    line-height: 1.5;
+    transform-origin: right;
+  }
+
+  .hero__lead {
+    max-width: 36rem;
+    margin-block-start: clamp(1.25rem, 0.8rem + 1.6vw, 2rem);
+    color: var(--navy-text);
+    font-size: var(--text-lg);
+    font-weight: 300;
+    line-height: var(--leading-snug);
+  }
+
+  :global([dir='rtl']) .hero__lead {
+    font-weight: 400;
   }
 
   .hero__actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-3);
     margin-block-start: var(--space-6);
   }
 
-  .hero__facts {
+  .hero__socials {
+    display: inline-flex;
+    gap: var(--space-2);
+    margin-inline-start: var(--space-2);
+  }
+
+  .hero__social {
     display: grid;
-    gap: var(--space-3);
-    align-content: end;
-    color: var(--fg-muted);
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--line-dark);
+    border-radius: 50%;
+    color: var(--mist);
+    transition:
+      background-color var(--dur-fast) ease,
+      color var(--dur-fast) ease,
+      border-color var(--dur-fast) ease;
   }
 
-  .hero__facts li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75em;
+  .hero__social:hover {
+    border-color: var(--white);
+    background: var(--white);
+    color: var(--navy);
   }
 
-  .hero__facts .nuqta {
-    color: var(--accent);
-    font-size: 0.8em;
-    translate: 0 -0.1em;
-  }
-
-  @media (min-width: 56rem) {
-    .hero__body {
-      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-      justify-content: space-between;
-      column-gap: var(--space-8);
-    }
-  }
-
-  /* ---------- Load sequence: each name is written in its own direction ---------- */
+  /* ---------- Motion ---------- */
 
   @media (prefers-reduced-motion: no-preference) {
-    .lockup__name:not([lang='ar']) {
-      animation: write-ltr 900ms var(--ease-out) 120ms both;
+    .hero__rise {
+      animation: rise 1000ms var(--ease-out) both;
+      animation-delay: calc(150ms + var(--i) * 100ms);
     }
 
-    .lockup__name[lang='ar'] {
-      animation: write-rtl 900ms var(--ease-out) 120ms both;
-    }
-
-    .lockup__name--secondary:not([lang='ar']),
-    .lockup__name--secondary[lang='ar'] {
-      animation-delay: 520ms;
-    }
-
-    .lockup__rule {
-      animation: draw-rule 800ms var(--ease-in-out) 320ms both;
-    }
-
-    .lockup__runner {
-      animation:
-        fade-in 400ms ease 1100ms both,
-        run-line 9s var(--ease-in-out) 1500ms infinite alternate;
-    }
-
-    .hero__lead,
-    .hero__facts {
-      animation: rise 800ms var(--ease-out) 900ms both;
-    }
-
-    .hero__facts {
-      animation-delay: 1050ms;
-    }
-  }
-
-  @keyframes write-ltr {
-    from {
-      clip-path: inset(-0.3em 100% -0.3em 0);
-    }
-    to {
-      clip-path: inset(-0.3em -0.1em -0.3em 0);
-    }
-  }
-
-  @keyframes write-rtl {
-    from {
-      clip-path: inset(-0.3em 0 -0.3em 100%);
-    }
-    to {
-      clip-path: inset(-0.3em 0 -0.3em -0.1em);
-    }
-  }
-
-  @keyframes draw-rule {
-    from {
-      transform: scaleX(0);
-    }
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-  }
-
-  @keyframes run-line {
-    to {
-      transform: translateX(calc(var(--dir) * (100% - 0.5em)));
+    .hero__script.hero__rise {
+      animation: write 1400ms var(--ease-out) both;
+      animation-delay: 450ms;
     }
   }
 
   @keyframes rise {
     from {
       opacity: 0;
-      translate: 0 1.25rem;
+      translate: 0 1.5rem;
     }
   }
+
+  /* The script line is written in, in its own direction. */
+  @keyframes write {
+    from {
+      clip-path: inset(-20% 100% -20% 0);
+    }
+    to {
+      clip-path: inset(-20% -5% -20% -5%);
+    }
+  }
+
+  :global([dir='rtl']) .hero__script.hero__rise {
+    animation-name: write-rtl;
+  }
+
+  @keyframes write-rtl {
+    from {
+      clip-path: inset(-20% 0 -20% 100%);
+    }
+    to {
+      clip-path: inset(-20% -5% -20% -5%);
+    }
+  }
+
+  @keyframes pulse {
+    from {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(3);
+    }
+  }
+
 </style>

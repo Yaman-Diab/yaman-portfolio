@@ -1,0 +1,63 @@
+---
+/**
+ * One thick ribbon that travels behind a stretch of the page as it scrolls:
+ * its head moves forward and its tail follows, sweeping in wide loops behind
+ * the cards (scripts/strokes.ts). A thin highlight rides on top of it so it
+ * reads as a rounded tube, not a flat line.
+ *
+ * The path is drawn in a 1000 × 3000 box that stretches to the section.
+ */
+interface Props {
+  /** Share of the path visible at once, 0–1. */
+  segment?: number;
+}
+
+const { segment = 0.32 } = Astro.props;
+
+const PATH =
+  'M-120 180C260 40 760 420 930 260C1150 60 1160 820 760 980C380 1130 60 1420 330 1700C600 1980 1120 1680 980 2160C880 2520 180 2380 260 2800C300 3010 760 3120 1150 2960';
+---
+
+<svg class="ribbon" viewBox="0 0 1000 3000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+  <path class="ribbon__body" d={PATH} pathLength="1" data-stroke data-segment={segment} />
+  <path class="ribbon__shine" d={PATH} pathLength="1" data-stroke data-segment={segment} />
+</svg>
+
+<style>
+  .ribbon {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .ribbon path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    /* Without scripts the ribbon simply rests, fully drawn. */
+    stroke-dasharray: none;
+  }
+
+  .ribbon__body {
+    stroke: #2f5fe0;
+    stroke-width: clamp(14px, 1.9vw, 30px);
+  }
+
+  .ribbon__shine {
+    stroke: #ffffff;
+    stroke-width: clamp(3px, 0.4vw, 6px);
+    opacity: 0.28;
+    translate: -3px -4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ribbon {
+      display: none;
+    }
+  }
+</style>

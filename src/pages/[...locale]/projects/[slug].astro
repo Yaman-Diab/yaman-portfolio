@@ -5,6 +5,7 @@ import type { Locale } from '@/domain/entities/locale';
 import { PROJECT_SLUGS, type ProjectSlug } from '@/domain/entities/project';
 import { getCaseStudy } from '@/domain/usecases/get-case-study';
 import CaseStudy from '@/presentation/features/case-study/CaseStudy.astro';
+import { splashOf } from '@/presentation/features/case-study/splash';
 import BaseLayout from '@/presentation/layouts/BaseLayout.astro';
 
 export function getStaticPaths() {
@@ -29,6 +30,7 @@ const { project, next } = getCaseStudy(portfolioRepository, locale, slug);
   description={project.summary}
   profile={profile}
   pathFor={(code) => routes.project(code, slug)}
+  splash={splashOf(project)}
 >
   <CaseStudy locale={locale} project={project} next={next} />
 </BaseLayout>
